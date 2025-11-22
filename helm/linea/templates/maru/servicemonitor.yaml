@@ -1,0 +1,19 @@
+{{- if .Values.maru.metrics.serviceMonitor.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "linea.maru.fullname" . }}
+  labels:
+    {{- include "linea.labels" (dict "context" . "component" .Values.maru.name "name" (printf "%s-metrics" .Values.maru.name)) | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "linea.selectorLabels" (dict "context" . "name" .Values.maru.name) | nindent 6 }}
+  endpoints:
+    - port: metrics
+      path: /metrics
+      interval: 30s
+  namespaceSelector:
+    matchNames:
+      - {{ .Release.Namespace }}
+{{- end }}

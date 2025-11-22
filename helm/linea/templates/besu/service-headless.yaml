@@ -1,0 +1,24 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "linea.besu.fullname" . }}-headless
+  labels:
+    {{- include "linea.labels" (dict "context" . "component" .Values.besu.name "name" .Values.besu.name) | nindent 4 }}
+spec:
+  type: ClusterIP
+  clusterIP: None
+  ports:
+    - port: {{ .Values.besu.service.servicePortRpc }}
+      targetPort: {{ .Values.besu.containerPorts.rpc }}
+      protocol: TCP
+      name: json-rpc
+    - port: {{ .Values.besu.service.servicePortWs }}
+      targetPort: {{ .Values.besu.containerPorts.ws }}
+      protocol: TCP
+      name: json-rpc-ws
+    - port: {{ .Values.besu.service.serviceEngineApi }}
+      targetPort: {{ .Values.besu.containerPorts.engine }}
+      protocol: TCP
+      name: engine
+  selector:
+    {{- include "linea.selectorLabels" (dict "context" . "name" .Values.besu.name) | nindent 4 }}

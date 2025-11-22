@@ -1,0 +1,19 @@
+{{- if .Values.sequencer.metrics.serviceMonitor.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "linea.sequencer.fullname" . }}
+  labels:
+    {{- include "linea.labels" (dict "context" . "component" .Values.sequencer.name "name" (printf "%s-metrics" .Values.sequencer.name)) | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "linea.selectorLabels" (dict "context" . "name" .Values.sequencer.name) | nindent 6 }}
+  endpoints:
+    - port: metrics
+      path: /metrics
+      interval: 30s
+  namespaceSelector:
+    matchNames:
+      - {{ .Release.Namespace }}
+{{- end }}

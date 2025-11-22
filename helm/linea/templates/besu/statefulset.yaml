@@ -1,0 +1,149 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "linea.besu.fullname" . }}
+  labels:
+    {{- include "linea.labels" (dict "context" . "component" .Values.besu.name "name" .Values.besu.name) | nindent 4 }}
+spec:
+  serviceName: {{ include "linea.besu.fullname" . }}-headless
+  replicas: 1
+  updateStrategy:
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      {{- include "linea.selectorLabels" (dict "context" . "name" .Values.besu.name) | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.besu.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "linea.labels" (dict "context" . "component" .Values.besu.name "name" .Values.besu.name) | nindent 8 }}
+        {{- with .Values.besu.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.besu.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "linea.besu.serviceAccountName" . }}
+      securityContext:
+        fsGroup: 1000
+      {{- with .Values.besu.podSecurityContext }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: {{ .Values.besu.name }}
+          {{- with .Values.besu.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          image: "{{ .Values.besu.image.repository }}:{{ .Values.besu.image.tag }}"
+          imagePullPolicy: {{ .Values.besu.image.pullPolicy }}
+          command: ["/bin/sh", "-c"]
+          args:
+            - >
+              besu-untuned
+              --config-file=/besu-data/config/config.toml
+              --genesis-file=/besu-data/genesis/genesis.json
+              --Xdns-enabled=true
+              --Xdns-update-enabled=true
+              --bootnodes=enode://14408801a444dafc44afbccce2eb755f902aed3b5743fed787b3c790e021fef28b8c827ed896aa4e8fb46e22bd67c39f994a73768b4b382f8597b0d44370e15d@{{ include "linea.sequencer.addr" . }}:{{ .Values.sequencer.service.servicePortP2p }}
+          env:
+            - name: LOG4J_CONFIGURATION_FILE
+              value: /besu-data/config/log4j.xml
+            - name: BESU_ETHSTATS
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "linea.besu.fullname" . }}
+                  key: ethstats
+          ports:
+            - name: json-rpc
+              containerPort: {{ .Values.besu.containerPorts.rpc }}
+              protocol: TCP
+            - name: json-rpc-ws
+              containerPort: {{ .Values.besu.containerPorts.ws }}
+              protocol: TCP
+            - name: engine
+              containerPort: {{ .Values.besu.containerPorts.engine }}
+              protocol: TCP
+            {{- if .Values.besu.metrics.enabled }}
+            - name: metrics
+              containerPort: {{ .Values.besu.containerPorts.metrics }}
+              protocol: TCP
+            {{- end }}
+          {{- with .Values.besu.livenessProbe }}
+          livenessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.besu.readinessProbe }}
+          readinessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.besu.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - name: config
+              mountPath: /besu-data/config/config.toml
+              subPath: config.toml
+            - name: config
+              mountPath: /besu-data/config/log4j.xml
+              subPath: log4j.xml
+            - name: genesis
+              mountPath: /besu-data/genesis
+            - name: traces-limits
+              mountPath: /besu-data/config/traces-limits.toml
+              subPath: tracelimits.toml
+            - name: {{ include "linea.besu.fullname" . }}
+              mountPath: /opt/besu/data
+            - name: config-sequencer
+              mountPath: /besu-data/config/deny-list.txt
+              subPath: deny-list.txt
+          {{- with .Values.besu.volumeMounts }}
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      volumes: 
+        - name: config
+          configMap:
+            name: {{ include "linea.besu.fullname" . }}-config
+        - name: config-sequencer
+          configMap:
+            name: {{ include "linea.sequencer.fullname" . }}-config
+        - name: genesis
+          configMap:
+            name:  {{ include "linea.fullname" . }}-genesis
+        - name: traces-limits
+          configMap:
+            name: {{ include "linea.fullname" . }}-traces-limits
+
+      {{- with .Values.besu.volumes }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.besu.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.besu.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.besu.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+  volumeClaimTemplates:
+    - metadata:
+        name: {{ include "linea.besu.fullname" . }}
+      spec:
+          {{-  with .Values.besu.volumeClaimTemplates.accessModes }}
+        accessModes:
+            {{- toYaml . | nindent 10 }}
+          {{- end }}
+        storageClassName: "{{ .Values.besu.volumeClaimTemplates.storageClass }}"
+        resources:
+          requests:
+            storage: "{{ .Values.besu.volumeClaimTemplates.size }}"

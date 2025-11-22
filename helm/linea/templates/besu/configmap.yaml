@@ -1,0 +1,108 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "linea.besu.fullname" . }}-config
+  labels:
+    {{- include "linea.labels" (dict "context" . "component" .Values.besu.name "name" .Values.besu.name) | nindent 4 }}
+data:
+  log4j.xml: |
+    <?xml version="1.0" encoding="UTF-8"?>
+    <Configuration status="INFO" monitorInterval="2">
+      <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+          <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSSZZZ} | %t | %-5level | %c{1} | %msg %throwable%n" />
+        </Console>
+      </Appenders>
+      <Loggers>
+        <!-- edit the package name/level below to add more logging to specific classes -->
+        <!-- no need to restart Besu as it will detect changes every 2s -->
+        <Logger name="org.hyperledger.besu" level="WARN" />
+        <!-- to avoid annoying message "INFO ... No sync target, waiting for peers. Current peers: 0" change to WARN-->
+        <Logger name="org.hyperledger.besu.ethereum.eth.sync.fullsync.FullSyncTargetManager" level="INFO" />
+        <Logger name="org.hyperledger.besu.ethereum.blockcreation" level="INFO" />
+        <Logger name="org.hyperledger.besu.consensus.merge.blockcreation" level="INFO" />
+        <Logger name="org.hyperledger.besu.ethereum.api.jsonrpc" level="INFO" />
+        <Logger name="io.opentelemetry" level="WARN" />
+        <Logger name="org.hyperledger.besu.ethereum.eth.transactions.TransactionPool" level="INFO" />
+
+        <!-- log the request and response of RPC calls -->
+        <Logger name="org.hyperledger.besu.ethereum.api.handlers.AbstractJsonRpcExecutor" level="INFO" />
+        <Logger name="org.hyperledger.besu.ethereum.api.handlers.JsonRpcArrayExecutor" level="INFO" />
+
+        <Logger name="net.consensys.linea.rpc.methods.LineaEstimateGas" level="INFO" />
+
+        <Root level="WARN">
+          <AppenderRef ref="Console"/>
+        </Root>
+      </Loggers>
+    </Configuration>
+
+  config.toml: |
+    data-path="/opt/besu/data"
+    host-allowlist=["*"]
+    sync-mode="FULL"
+    p2p-port=30303
+
+    min-gas-price=0
+
+    # engine
+    engine-host-allowlist=["*"]
+    engine-rpc-port=8550
+    engine-jwt-disabled=true
+
+    # rpc
+    rpc-http-enabled=true
+    rpc-http-host="0.0.0.0"
+    rpc-http-port={{ .Values.besu.containerPorts.rpc }}
+    rpc-http-cors-origins=["*"]
+    rpc-http-api=["ADMIN","DEBUG","NET","ETH","ENGINE","WEB3","PLUGINS","LINEA"]
+    rpc-http-max-active-connections=200
+
+    # ws
+    rpc-ws-enabled=true
+    rpc-ws-host="0.0.0.0"
+    rpc-ws-port={{ .Values.besu.containerPorts.ws }}
+    rpc-ws-api=["ADMIN","TXPOOL","WEB3","ETH","NET","PERM","LINEA"]
+    rpc-ws-max-active-connections=200
+
+    # graphql
+    graphql-http-enabled=false
+
+    # metrics
+    metrics-enabled={{ .Values.besu.metrics.enabled }}
+    metrics-host="0.0.0.0"
+    metrics-port={{ .Values.besu.containerPorts.metrics }}
+
+    # database
+    data-storage-format="BONSAI"
+
+    # plugins
+    plugins=["LineaEstimateGasEndpointPlugin","LineaTransactionPoolValidatorPlugin","LineaTransactionValidatorPlugin"]
+    plugin-linea-module-limit-file-path="/besu-data/config/traces-limits.toml"
+    plugin-linea-deny-list-path="/besu-data/config/deny-list.txt"
+    plugin-linea-l1l2-bridge-contract="0xe537D669CA013d86EBeF1D64e40fC74CADC91987"
+    plugin-linea-l1l2-bridge-topic="e856c2b8bd4eb0027ce32eeaf595c21b0b6b4644b326e5b7bd80a1cf8db72e6c"
+    plugin-linea-tx-pool-profitability-check-p2p-enabled=true
+    plugin-linea-tx-pool-profitability-check-api-enabled=true
+    plugin-linea-tx-pool-simulation-check-api-enabled=true
+    plugin-linea-tx-pool-simulation-check-p2p-enabled=true
+    plugin-linea-extra-data-pricing-enabled=true
+    plugin-linea-max-tx-calldata-size=30000 # lower this to 30000 (default 60000) for the transaction data limit e2e test
+    plugin-linea-tx-pool-min-margin="0"
+    plugin-linea-min-margin="0"
+    plugin-linea-fixed-gas-cost-wei=30000000
+    plugin-linea-variable-gas-cost-wei=1000000000
+    plugin-linea-extra-data-set-min-gas-price-enabled=true
+    plugin-linea-estimate-gas-compatibility-mode-enabled=false
+    plugin-linea-estimate-gas-min-margin="0"
+    plugin-linea-limitless-enabled=false
+
+    Xin-process-rpc-enabled=true
+    Xin-process-rpc-apis=["ETH", "MINER"]
+
+    cache-last-block-headers-preload-enabled=true
+    cache-last-block-headers=50
+
+    bonsai-limit-trie-logs-enabled=false
+    bonsai-historical-block-limit=1024
+    bonsai-parallel-tx-processing-enabled=false

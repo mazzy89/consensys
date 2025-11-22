@@ -1,0 +1,28 @@
+{{- if .Values.besu.httpRoute.enabled -}}
+{{- $svcHeadless := printf "%s-headless" (include "linea.besu.fullname" .) -}}
+{{- $rpcPort := .Values.besu.service.servicePortRpc -}}
+{{- $wsPort := .Values.besu.service.servicePortWs -}}
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: {{ include "linea.besu.fullname" . }}
+  labels:
+    {{- include "linea.labels" (dict "context" . "component" .Values.besu.name "name" .Values.besu.name) | nindent 4 }}
+  {{- with .Values.besu.httpRoute.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  parentRefs:
+    {{- with .Values.besu.httpRoute.parentRefs }}
+      {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- with .Values.besu.httpRoute.hostnames }}
+  hostnames:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  rules:
+    {{- with .Values.besu.httpRoute.rules }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+{{- end }}

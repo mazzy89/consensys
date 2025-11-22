@@ -1,0 +1,17 @@
+{{- if .Values.maru.metrics.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "linea.maru.fullname" . }}-metrics
+  labels:
+    {{- include "linea.labels" (dict "context" . "component" .Values.maru.name "name" (printf "%s-metrics" .Values.maru.name)) | nindent 4 }}
+spec:
+  type: {{ .Values.maru.metrics.service.type }}
+  ports:
+    - port: {{ .Values.maru.metrics.service.servicePort }}
+      targetPort: metrics
+      protocol: TCP
+      name: metrics
+  selector:
+    {{- include "linea.selectorLabels" (dict "context" . "name" .Values.maru.name) | nindent 4 }}
+{{- end }}

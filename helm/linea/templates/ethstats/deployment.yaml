@@ -1,0 +1,82 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "linea.ethstats.fullname" . }}
+  labels:
+    {{- include "linea.labels" (dict "context" . "component" .Values.ethstats.name "name" .Values.ethstats.name) | nindent 4 }}
+spec:
+  replicas: {{ .Values.ethstats.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "linea.selectorLabels" (dict "context" . "name" .Values.ethstats.name) | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.ethstats.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "linea.selectorLabels" (dict "context" . "name" .Values.ethstats.name) | nindent 8 }}
+        {{- with .Values.ethstats.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.ethstats.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "linea.ethstats.fullname" . }}
+      {{- with .Values.ethstats.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: {{ .Values.ethstats.name }}
+          {{- with .Values.ethstats.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          image: "{{ .Values.ethstats.image.repository }}:{{ .Values.ethstats.image.tag }}"
+          imagePullPolicy: {{ .Values.ethstats.image.pullPolicy }}
+          env:
+            - name: WS_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "linea.ethstats.fullname" . }}
+                  key: ws_secret
+          ports:
+            - name: ws
+              containerPort: {{ .Values.ethstats.service.port }}
+              protocol: TCP
+          {{- with .Values.ethstats.livenessProbe }}
+          livenessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.ethstats.readinessProbe }}
+          readinessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.ethstats.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.ethstats.volumeMounts }}
+          volumeMounts:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      {{- with .Values.ethstats.volumes }}
+      volumes:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.ethstats.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.ethstats.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.ethstats.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

@@ -1,0 +1,587 @@
+# -- Used to override the deployment name. Overrides the chart name.
+nameOverride: ""
+
+# -- Used to override the full deployment name. Overrides the chart name and release name.
+fullnameOverride: ""
+
+# --- Global Secrets ---
+secret:
+  # -- Secret key for Ethstats WebSocket connections
+  ws_secret: ""
+
+# ===================================================================================
+# --- Besu Configuration ---
+# ===================================================================================
+besu:
+  # -- The component name, used for internal identification
+  name: besu
+
+  # -- Docker image settings for the Besu client.
+  image:
+    # -- Image pull policy
+    pullPolicy: IfNotPresent
+    # -- Docker repository path for the Besu image.
+    repository: consensys/linea-besu-package
+    # -- Specific Docker image tag (version) to use.
+    tag: beta-v4.0-rc20-20251104100707-3294a02
+
+  # -- List of secrets used for pulling images from private registries.
+  imagePullSecrets: []
+
+  # -- Service Account configuration.
+  serviceAccount:
+    # -- Annotations for the created ServiceAccount.
+    annotations: {}
+    # -- Controls if the ServiceAccount token should be automatically mounted.
+    automount: true
+    # -- If true, a ServiceAccount resource will be created.
+    create: true
+    # -- The name of the ServiceAccount to use or create.
+    name: ""
+
+  # -- Annotations to add to the Pod metadata.
+  podAnnotations: {}
+  # -- Labels to add to the Pod metadata.
+  podLabels: {}
+  # -- Security context applied to the Pod.
+  podSecurityContext: {}
+
+  # -- Security context applied to the container.
+  securityContext: {}
+
+  # -- Service configuration for API ports.
+  service:
+    # -- Port for the Engine API (e.g., for Sequencers).
+    serviceEngineApi: 8550
+    # -- Port for the JSON-RPC API.
+    servicePortRpc: 8545
+    # -- Port for the WebSocket API.
+    servicePortWs: 8546
+
+  # -- Container port mappings for the Besu client.
+  containerPorts:
+    # -- Internal container port for the Engine API.
+    engine: 8550
+    # -- Internal container port for metrics (Prometheus).
+    metrics: 9547
+    # -- Internal container port for JSON-RPC.
+    rpc: 8545
+    # -- Internal container port for WebSocket.
+    ws: 8546
+
+  # -- Metrics configuration.
+  metrics:
+    # -- Enable or disable Prometheus metrics endpoint.
+    enabled: false
+    # -- Service definition for the metrics endpoint.
+    service:
+      # -- Metrics service port.
+      servicePort: 9547
+      # -- Kubernetes Service type (e.g., ClusterIP, NodePort, LoadBalancer).
+      type: ClusterIP
+    # -- Prometheus ServiceMonitor configuration (requires prometheus-operator).
+    serviceMonitor:
+      # -- Enable or disable ServiceMonitor creation.
+      enabled: false
+
+  # -- Kubernetes Gateway API HttpRoute configuration (if using the Gateway API).
+  httpRoute:
+    # -- Annotations for the HttpRoute resource.
+    annotations: {}
+    # -- Enable or disable HttpRoute creation.
+    enabled: false
+    # -- List of hostnames the route should match.
+    hostnames: []
+    # -- List of parent Gateways this route is attached to.
+    parentRefs:
+      - name: gateway
+        sectionName: http
+    # -- Routing rules.
+    rules:
+      - matches:
+          - path:
+              # -- Type of path matching (e.g., PathPrefix).
+              type: PathPrefix
+              # -- The path value to match.
+              value: /headers
+
+  # -- Resource limits and requests (CPU/Memory).
+  resources: {}
+
+  # -- Vertical Pod Autoscaler configuration
+  vpa:
+    # -- Enable or disable VPA
+    enabled: false
+    # -- Update mode for VPA (Off, Initial, Recreate, Auto)
+    updateMode: Auto
+    # -- Resource policy configuration
+    resourcePolicy:
+      # -- Container policies
+      containerPolicies:
+        # -- Minimum allowed resources
+        minAllowed:
+          cpu: 100m
+          memory: 512Mi
+        # -- Maximum allowed resources
+        maxAllowed:
+          cpu: "4"
+          memory: 8Gi
+        # -- Resources to be controlled by VPA
+        controlledResources: [ "cpu", "memory" ]
+
+  # -- Liveness probe configuration.
+  livenessProbe:
+    # -- Minimum consecutive failures for the probe to be considered failed.
+    failureThreshold: 3
+    # -- HTTP GET action for the probe.
+    httpGet:
+      # -- Path to check.
+      path: /liveness
+      # -- Port to check.
+      port: 8545
+    # -- Number of seconds after the container has started before liveness probes are initiated.
+    initialDelaySeconds: 180
+    # -- How often to perform the probe (seconds).
+    periodSeconds: 60
+    # -- Minimum consecutive successes for the probe to be considered successful after having failed.
+    successThreshold: 1
+    # -- Number of seconds after which the probe times out.
+    timeoutSeconds: 1
+  # -- Readiness probe configuration.
+  readinessProbe: {}
+
+  # -- Persistent Volume Claim template for stateful storage (e.g., blockchain data).
+  volumeClaimTemplates:
+    # -- List of access modes for the volume (e.g., ReadWriteOnce).
+    accessModes:
+      - ReadWriteOnce
+    # -- Desired size of the persistent volume.
+    size: 50Gi
+    # -- Storage class to use for the volume.
+    storageClass: ""
+
+  # -- List of volume mounts for the container.
+  volumeMounts: []
+  # -- List of additional volumes defined at the Pod level.
+  volumes: []
+
+  # -- Pod affinity settings.
+  affinity: {}
+  # -- Node selection constraints.
+  nodeSelector: {}
+  # -- Tolerations for taints.
+  tolerations: []
+
+# ===================================================================================
+# --- Ethstats Configuration ---
+# ===================================================================================
+ethstats:
+  # -- The component name
+  name: ethstats
+  # -- Number of desired replicas for the deployment.
+  replicaCount: 1
+
+  # -- Docker image settings for Ethstats.
+  image:
+    # -- Image pull policy. 'IfNotPresent' is typical for production.
+    pullPolicy: IfNotPresent
+    # -- Docker repository path for the Ethstats image.
+    repository: consensys/linea-ethstats-server
+    # -- Specific Docker image tag (version) to use.
+    tag: 7422b2a-1730387766
+
+
+  # -- List of secrets used for pulling images from private registries.
+  imagePullSecrets: []
+
+  # -- Service Account configuration.
+  serviceAccount:
+    # -- Annotations for the created ServiceAccount.
+    annotations: { }
+    # -- Controls if the ServiceAccount token should be automatically mounted.
+    automount: true
+    # -- If true, a ServiceAccount resource will be created.
+    create: true
+    # -- The name of the ServiceAccount to use or create.
+    name: ""
+
+
+  # -- Annotations to add to the Pod metadata.
+  podAnnotations: {}
+  # -- Labels to add to the Pod metadata.
+  podLabels: {}
+  # -- Security context applied to the Pod.
+  podSecurityContext: {}
+
+  # -- Kubernetes Gateway API HttpRoute configuration (if using the Gateway API).
+  httpRoute:
+    # -- Annotations for the HttpRoute resource.
+    annotations: {}
+    # -- Enable or disable HttpRoute creation.
+    enabled: false
+    # -- List of hostnames the route should match.
+    hostnames: []
+    # -- List of parent Gateways this route is attached to.
+    parentRefs:
+      - name: gateway
+        sectionName: http
+    # -- Routing rules.
+    rules:
+      - matches:
+          - path:
+              # -- Type of path matching (e.g., PathPrefix).
+              type: PathPrefix
+              # -- The path value to match.
+              value: /headers
+
+  # -- Service configuration for the Ethstats dashboard.
+  service:
+    # -- Service port for Ethstats.
+    port: 3000
+    # -- Kubernetes Service type (e.g., ClusterIP, NodePort, LoadBalancer).
+    type: ClusterIP
+
+
+  # -- Liveness probe configuration.
+  livenessProbe:
+    # -- Minimum consecutive failures for the probe to be considered failed.
+    failureThreshold: 3
+    # -- HTTP GET action for the probe.
+    httpGet:
+      # -- Path to check.
+      path: /
+      # -- Port to check.
+      port: 3000
+    # -- Number of seconds after the container has started before liveness probes are initiated.
+    initialDelaySeconds: 10
+    # -- How often to perform the probe (seconds).
+    periodSeconds: 10
+    # -- Minimum consecutive successes for the probe to be considered successful after having failed.
+    successThreshold: 1 # Added for consistency
+    # -- Number of seconds after which the probe times out.
+    timeoutSeconds: 1 # Added for consistency
+
+  # -- Readiness probe configuration.
+  readinessProbe:
+    # -- Minimum consecutive failures for the probe to be considered failed.
+    failureThreshold: 3
+    # -- HTTP GET action for the probe.
+    httpGet:
+      # -- Path to check.
+      path: /
+      # -- Port to check.
+      port: 3000
+    # -- Number of seconds after the container has started before liveness probes are initiated.
+    initialDelaySeconds: 5
+    # -- How often to perform the probe (seconds).
+    periodSeconds: 5
+    # -- Minimum consecutive successes for the probe to be considered successful after having failed.
+    successThreshold: 1 # Added for consistency
+    # -- Number of seconds after which the probe times out.
+    timeoutSeconds: 1 # Added for consistency
+
+  # -- Resource limits and requests (CPU/Memory).
+  resources: {}
+
+  # -- Vertical Pod Autoscaler configuration
+  vpa:
+    # -- Enable or disable VPA
+    enabled: false
+    # -- Update mode for VPA (Off, Initial, Recreate, Auto)
+    updateMode: Auto
+    # -- Resource policy configuration
+    resourcePolicy:
+      # -- Container policies
+      containerPolicies: {}
+
+  # -- Security context applied to the container.
+  securityContext: {}
+
+  # -- List of volume mounts for the container.
+  volumeMounts: []
+  # -- List of additional volumes defined at the Pod level.
+  volumes: []
+
+  # -- Node selection constraints.
+  nodeSelector: {}
+  # -- Tolerations for taints.
+  tolerations: [ ]
+  # -- Pod affinity settings.
+  affinity: { }
+
+
+# ===================================================================================
+# --- Maru Configuration ---
+# ===================================================================================
+maru:
+  # -- The component name
+  name: maru
+
+  # -- Pod affinity settings.
+  affinity: {}
+
+  # -- Container port mappings.
+  containerPorts:
+    # -- Internal container port for the API.
+    api: 8080
+    # -- Internal container port for metrics (Prometheus).
+    metrics: 9547
+
+  # -- Docker image settings for Maru.
+  image:
+    # -- Image pull policy. 'IfNotPresent' is typical for production.
+    pullPolicy: IfNotPresent
+    # -- Docker repository path for the Maru image.
+    repository: consensys/maru
+    # -- Specific Docker image tag (version) to use.
+    tag: 0f6dc85
+
+  # -- List of secrets used for pulling images from private registries.
+  imagePullSecrets: []
+
+  # -- Liveness probe configuration.
+  livenessProbe: {}
+
+  # -- Metrics configuration.
+  metrics:
+    # -- Enable or disable Prometheus metrics endpoint.
+    enabled: false
+    # -- Service definition for the metrics endpoint.
+    service:
+      # -- Metrics service port.
+      servicePort: 9547
+      # -- Kubernetes Service type (e.g., ClusterIP, NodePort, LoadBalancer).
+      type: ClusterIP
+    # -- Prometheus ServiceMonitor configuration (requires prometheus-operator).
+    serviceMonitor:
+      # -- Enable or disable ServiceMonitor creation.
+      enabled: false
+
+  # -- Node selection constraints.
+  nodeSelector: {}
+
+  # -- Annotations to add to the Pod metadata.
+  podAnnotations: {}
+  # -- Labels to add to the Pod metadata.
+  podLabels: {}
+  # -- Security context applied to the Pod.
+  podSecurityContext: {}
+
+  # -- Readiness probe configuration.
+  readinessProbe: {}
+
+  # -- Resource limits and requests (CPU/Memory).
+  resources: {}
+
+  # -- Vertical Pod Autoscaler configuration
+  vpa:
+    # -- Enable or disable VPA
+    enabled: false
+    # -- Update mode for VPA (Off, Initial, Recreate, Auto)
+    updateMode: Auto
+    # -- Resource policy configuration
+    resourcePolicy:
+      # -- Container policies
+      containerPolicies:
+        # -- Minimum allowed resources
+        minAllowed:
+          cpu: 100m
+          memory: 512Mi
+        # -- Maximum allowed resources
+        maxAllowed:
+          cpu: "4"
+          memory: 8Gi
+        # -- Resources to be controlled by VPA
+        controlledResources: [ "cpu", "memory" ]
+
+  # -- Internal secret configuration for Maru.
+  secret:
+    # -- Key for Maru's specific secret.
+    key: ""
+
+  # -- Security context applied to the container.
+  securityContext: {}
+
+  # -- Service configuration for API ports.
+  service:
+    # -- Service port for the API.
+    servicePortApi: 8080
+
+  # -- Service Account configuration.
+  serviceAccount:
+    # -- Annotations for the created ServiceAccount.
+    annotations: {}
+    # -- Controls if the ServiceAccount token should be automatically mounted.
+    automount: true
+    # -- If true, a ServiceAccount resource will be created.
+    create: true
+    # -- The name of the ServiceAccount to use or create.
+    name: ""
+
+  # -- Tolerations for taints.
+  tolerations: []
+
+  # -- Persistent Volume Claim template for stateful storage.
+  volumeClaimTemplates:
+    # -- List of access modes for the volume (e.g., ReadWriteOnce).
+    accessModes:
+      - ReadWriteOnce
+    # -- Desired size of the persistent volume.
+    size: 100Gi
+    # -- Storage class to use for the volume.
+    storageClass: ""
+
+  # -- List of volume mounts for the container.
+  volumeMounts: []
+  # -- List of additional volumes defined at the Pod level.
+  volumes: []
+
+# ===================================================================================
+# --- Sequencer Configuration ---
+# ===================================================================================
+sequencer:
+  # -- Container port mappings.
+  containerPorts:
+    # -- Internal container port for the Engine API.
+    engine: 8550
+    # -- Internal container port for the Execution API (eth).
+    eth: 8545
+    # -- Internal container port for metrics (Prometheus).
+    metrics: 9547
+    # -- Internal container port for P2P networking.
+    p2p: 30303
+
+  # -- Docker image settings for the Sequencer client (Besu package).
+  image:
+    # -- Image pull policy. 'IfNotPresent' is typical for production.
+    pullPolicy: IfNotPresent
+    # -- Docker repository path for the Sequencer image.
+    repository: consensys/linea-besu-package
+    # -- Specific Docker image tag (version) to use.
+    tag: beta-v4.0-rc20-20251104100707-3294a02
+
+  # -- List of secrets used for pulling images from private registries.
+  imagePullSecrets: []
+
+  # -- Liveness probe configuration.
+  livenessProbe:
+    # -- Minimum consecutive failures for the probe to be considered failed.
+    failureThreshold: 3
+    # -- HTTP GET action for the probe.
+    httpGet:
+      # -- Path to check.
+      path: /liveness
+      # -- Port to check.
+      port: 8545
+    # -- Number of seconds after the container has started before liveness probes are initiated.
+    initialDelaySeconds: 180
+    # -- How often to perform the probe (seconds).
+    periodSeconds: 60
+    # -- Minimum consecutive successes for the probe to be considered successful after having failed.
+    successThreshold: 1
+    # -- Number of seconds after which the probe times out.
+    timeoutSeconds: 1
+
+  # -- Metrics configuration.
+  metrics:
+    # -- Enable or disable Prometheus metrics endpoint.
+    enabled: false
+    # -- Service definition for the metrics endpoint.
+    service:
+      # -- Metrics service port.
+      servicePort: 9547
+      # -- Kubernetes Service type (e.g., ClusterIP, NodePort, LoadBalancer).
+      type: ClusterIP
+    # -- Prometheus ServiceMonitor configuration (requires prometheus-operator).
+    serviceMonitor:
+      # -- Enable or disable ServiceMonitor creation.
+      enabled: false
+
+  # -- The component name, used for internal identification and potentially labels/selectors.
+  name: sequencer
+
+  # -- Node selection constraints.
+  nodeSelector: {}
+
+  # -- Annotations to add to the Pod metadata.
+  podAnnotations: {}
+  # -- Labels to add to the Pod metadata.
+  podLabels: {}
+  # -- Security context applied to the Pod.
+  podSecurityContext: {}
+
+  # -- Readiness probe configuration.
+  readinessProbe: {}
+
+  # -- Resource limits and requests (CPU/Memory).
+  resources: {}
+
+  # -- Vertical Pod Autoscaler configuration
+  vpa:
+    # -- Enable or disable VPA
+    enabled: false
+    # -- Update mode for VPA (Off, Initial, Recreate, Auto)
+    updateMode: Auto
+    # -- Resource policy configuration
+    resourcePolicy:
+      # -- Container policies
+      containerPolicies:
+        # -- Minimum allowed resources
+        minAllowed:
+          cpu: 100m
+          memory: 512Mi
+        # -- Maximum allowed resources
+        maxAllowed:
+          cpu: "4"
+          memory: 8Gi
+        # -- Resources to be controlled by VPA
+        controlledResources: [ "cpu", "memory" ]
+
+  # -- Internal secret configuration for the Sequencer.
+  secret:
+    # -- Key for Sequencer's specific secret.
+    key: ""
+
+  # -- Security context applied to the container.
+  securityContext: {}
+
+  # -- Service configuration for API ports.
+  service:
+    # -- Port for the Engine API.
+    serviceEngineApi: 8550
+    # -- Port for the Execution API (eth).
+    serviceEthApi: 8545
+    # -- Port for P2P networking.
+    servicePortP2p: 30303
+
+  # -- Service Account configuration.
+  serviceAccount:
+    # -- Annotations for the created ServiceAccount.
+    annotations: {}
+    # -- Controls if the ServiceAccount token should be automatically mounted.
+    automount: true
+    # -- If true, a ServiceAccount resource will be created.
+    create: true
+    # -- The name of the ServiceAccount to use or create.
+    name: ""
+
+  # -- Tolerations for taints.
+  tolerations: []
+
+  # -- Persistent Volume Claim template for stateful storage (e.g., blockchain data).
+  volumeClaimTemplates:
+    # -- List of access modes for the volume (e.g., ReadWriteOnce).
+    accessModes:
+      - ReadWriteOnce
+    # -- Desired size of the persistent volume.
+    size: 50Gi
+    # -- Storage class to use for the volume.
+    storageClass: ""
+
+  # -- List of volume mounts for the container.
+  volumeMounts: []
+  # -- List of additional volumes defined at the Pod level.
+  volumes: []
+
+  # -- Pod affinity settings.
+  affinity: { }

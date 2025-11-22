@@ -1,0 +1,21 @@
+---
+
+helmDefaults:
+  timeout: 200
+  atomic: true
+  historyMax: 20
+  wait: true
+  createNamespace: true
+
+releases:
+  - name: linea
+    namespace: linea
+    chart: ./deploy/linea/kustomize
+    dependencies:
+      - chart: ./helm/linea
+        version: 1.0.0
+        alias: linea
+    values:
+      - ./deploy/{{ `{{ .Release.Name }}` }}/values.example.yaml
+    secrets:
+      - ./deploy/{{ `{{ .Release.Name }}` }}/secrets.example.yaml.enc

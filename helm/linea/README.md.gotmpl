@@ -1,0 +1,55 @@
+# Linea Helm Chart
+
+{{ template "chart.badgesSection" . }}
+
+This Helm chart deploys the full **Linea stack**, including:
+
+* **Besu**: a blockchain client rpc node receiving transactions and propagating them to the rest of the network
+* **EthStats**: a web UI which displays network nodes status like latest block, number of peers, etc.
+* **Maru**: an in-house developed consensus client, similar to Teku and others, which is proposing and signing blocks (since we're running Paris fork)
+* **Sequencer**: an execution layer sequencer which is in charge of sequencing(ordering) transactions in a block
+
+It provides a complete configuration surface with persistence, metrics, Gateway API support, autoscaling, and customizable security contexts.
+
+---
+
+## 📦 Installation
+
+```sh
+helm repo add linea https://example.com/helm-charts
+helm install my-linea linea/linea-stack
+```
+
+You can override any value using:
+
+```sh
+helm install my-linea linea/linea-stack -f values.example.yaml
+```
+
+---
+
+## 🛠️ Configuration
+
+{{ template "chart.valuesSection" . }}
+
+---
+
+## 🧪 Testing
+
+Lint the chart:
+
+```sh
+helm lint .
+```
+
+Render templates for debugging:
+
+```sh
+helm template my-linea .
+```
+
+---
+
+## 📄 License
+
+This project is licensed under the Apache 2.0 License.

@@ -1,0 +1,17 @@
+{{- if .Values.besu.metrics.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "linea.besu.fullname" . }}-metrics
+  labels:
+    {{- include "linea.labels" (dict "context" . "component" .Values.besu.name "name" (printf "%s-metrics" .Values.besu.name)) | nindent 4 }}
+spec:
+  type: {{ .Values.besu.metrics.service.type }}
+  ports:
+    - port: {{ .Values.besu.metrics.service.servicePort }}
+      targetPort: metrics
+      protocol: TCP
+      name: metrics
+  selector:
+    {{- include "linea.selectorLabels" (dict "context" . "name" .Values.besu.name) | nindent 4 }}
+{{- end }}

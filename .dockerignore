@@ -1,0 +1,12 @@
+.direnv
+deploy
+hack
+helm
+terraform
+
+.envrc
+.gitignore
+flake*
+helmfile.yaml.gotmpl
+Makefile
+README.md

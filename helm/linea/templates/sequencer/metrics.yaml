@@ -1,0 +1,17 @@
+{{- if .Values.sequencer.metrics.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "linea.sequencer.fullname" . }}-metrics
+  labels:
+    {{- include "linea.labels" (dict "context" . "component" .Values.sequencer.name "name" (printf "%s-metrics" .Values.sequencer.name)) | nindent 4 }}
+spec:
+  type: {{ .Values.sequencer.metrics.service.type }}
+  ports:
+    - port: {{ .Values.sequencer.metrics.service.servicePort }}
+      targetPort: metrics
+      protocol: TCP
+      name: metrics
+  selector:
+    {{- include "linea.selectorLabels" (dict "context" . "name" .Values.sequencer.name) | nindent 4 }}
+{{- end }}

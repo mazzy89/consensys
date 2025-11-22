@@ -1,0 +1,146 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "linea.sequencer.fullname" . }}
+  labels:
+    {{- include "linea.labels" (dict "context" . "component" .Values.sequencer.name "name" .Values.sequencer.name) | nindent 4 }}
+spec:
+  serviceName: {{ include "linea.sequencer.fullname" . }}-headless
+  replicas: 1
+  updateStrategy:
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      {{- include "linea.selectorLabels" (dict "context" . "name" .Values.sequencer.name) | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.sequencer.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "linea.labels" (dict "context" . "component" .Values.sequencer.name "name" .Values.sequencer.name) | nindent 8 }}
+        {{- with .Values.sequencer.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.sequencer.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "linea.sequencer.serviceAccountName" . }}
+      securityContext:
+        fsGroup: 1000
+      {{- with .Values.sequencer.podSecurityContext }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: {{ .Values.sequencer.name }}
+          {{- with .Values.sequencer.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          image: "{{ .Values.sequencer.image.repository }}:{{ .Values.sequencer.image.tag }}"
+          imagePullPolicy: {{ .Values.sequencer.image.pullPolicy }}
+          command: [ "besu-untuned" ]
+          args:
+          - --config-file=/besu-data/config/config.toml
+          - --node-private-key-file=/besu-data/key
+          env:
+            - name: LOG4J_CONFIGURATION_FILE
+              value: /besu-data/config/log4j.xml
+            - name: BESU_ETHSTATS
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "linea.sequencer.fullname" . }}
+                  key: ethstats
+          ports:
+            - name: p2p
+              containerPort: {{ .Values.sequencer.containerPorts.p2p }}
+              protocol: TCP
+            - name: engine
+              containerPort: {{ .Values.sequencer.containerPorts.engine }}
+              protocol: TCP
+            - name: eth
+              containerPort: {{ .Values.sequencer.containerPorts.eth }}
+              protocol: TCP
+            {{- if .Values.sequencer.metrics.enabled }}
+            - name: metrics
+              containerPort: {{ .Values.besu.containerPorts.metrics }}
+              protocol: TCP
+            {{- end }}
+          {{- with .Values.sequencer.livenessProbe }}
+          livenessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.sequencer.readinessProbe }}
+          readinessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.sequencer.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - name: config
+              mountPath: /besu-data/config/config.toml
+              subPath: config.toml
+            - name: config
+              mountPath: /besu-data/config/log4j.xml
+              subPath: log4j.xml
+            - name: genesis
+              mountPath: /besu-data/genesis
+            - name: traces-limits
+              mountPath: /besu-data/config/traces-limits.toml
+              subPath: tracelimits.toml
+            - name: {{ include "linea.sequencer.fullname" . }}
+              mountPath: /opt/besu/data
+            - name: key
+              mountPath: /besu-data/key
+              subPath: key
+            - name: config
+              mountPath: /besu-data/config/deny-list.txt
+              subPath: deny-list.txt
+          {{- with .Values.sequencer.volumeMounts }}
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      volumes: 
+        - name: config
+          configMap:
+            name: {{ include "linea.sequencer.fullname" . }}-config
+        - name: genesis
+          configMap:
+            name:  {{ include "linea.fullname" . }}-genesis
+        - name: traces-limits
+          configMap:
+            name: {{ include "linea.fullname" . }}-traces-limits
+        - name: key
+          secret:
+            secretName: {{ include "linea.sequencer.fullname" . }}
+      {{- with .Values.sequencer.volumes }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.sequencer.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.sequencer.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.sequencer.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+  volumeClaimTemplates:
+    - metadata:
+        name: {{ include "linea.sequencer.fullname" . }}
+      spec:
+          {{-  with .Values.sequencer.volumeClaimTemplates.accessModes }}
+        accessModes:
+            {{- toYaml . | nindent 10 }}
+          {{- end }}
+        storageClassName: "{{ .Values.sequencer.volumeClaimTemplates.storageClass }}"
+        resources:
+          requests:
+            storage: "{{ .Values.sequencer.volumeClaimTemplates.size }}"

@@ -1,0 +1,96 @@
+linea:
+  besu:
+    image:
+      repository: consensys/linea-besu-package
+      tag: "beta-v4.0-rc20-20251104100707-3294a02"
+    httpRoute:
+      enabled: true
+      hostnames:
+        - besu-node.mazzarino.cz
+      parentRefs:
+        - name: linea
+      rules:
+        - matches:
+            - path:
+                type: PathPrefix
+                value: /
+          backendRefs:
+            - name: linea-besu-headless
+              port: 8545
+        - matches:
+            - path:
+                type: PathPrefix
+                value: /ws
+          backendRefs:
+            - name: linea-besu-headless
+              port: 8546
+    resources:
+      requests:
+        cpu: "500m"
+        memory: "512Mi"
+    volumeClaimTemplates:
+      storageClass: "gp2"
+    vpa:
+      enabled: true
+      updateMode: Auto
+      resourcePolicy:
+        containerPolicies:
+          controlledResources: [ "cpu", "memory" ]
+          maxAllowed:
+            cpu: "1"
+            memory: "1Gi"
+          minAllowed:
+            cpu: "500m"
+            memory: "512Mi"
+
+
+  ethstats:
+    image:
+      repository: consensys/linea-ethstats-server
+      tag: "7422b2a-1730387766"
+    httpRoute:
+      enabled: true
+      hostnames:
+        - ethstats.mazzarino.cz
+      parentRefs:
+        - name: linea
+      rules:
+        - matches:
+            - path:
+                type: PathPrefix
+                value: /
+
+  maru:
+    image:
+      repository: consensys/maru
+    metrics:
+      enabled: true
+      service:
+        servicePort: 9547
+    livenessProbe:
+      httpGet:
+        path: /live
+        port: 9547
+      initialDelaySeconds: 10
+      timeoutSeconds: 10
+      periodSeconds: 1
+      successThreshold: 1
+      failureThreshold: 3
+    readinessProbe:
+      httpGet:
+        path: /ready
+        port: 9547
+      initialDelaySeconds: 10
+      timeoutSeconds: 10
+      periodSeconds: 1
+      successThreshold: 1
+      failureThreshold: 3
+    volumeClaimTemplates:
+      storageClass: "gp2"
+
+  sequencer:
+    image:
+      repository: consensys/linea-besu-package
+      tag: "beta-v4.0-rc20-20251104100707-3294a02"
+    volumeClaimTemplates:
+      storageClass: "gp2"

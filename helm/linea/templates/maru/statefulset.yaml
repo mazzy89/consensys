@@ -1,0 +1,128 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "linea.maru.fullname" . }}
+  labels:
+    {{- include "linea.labels" (dict "context" . "component" .Values.maru.name "name" .Values.maru.name) | nindent 4 }}
+spec:
+  serviceName: {{ include "linea.maru.fullname" . }}-headless
+  replicas: 1
+  updateStrategy:
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      {{- include "linea.selectorLabels" (dict "context" . "name" .Values.maru.name) | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.maru.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "linea.labels" (dict "context" . "component" .Values.maru.name "name" .Values.maru.name) | nindent 8 }}
+        {{- with .Values.maru.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.maru.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "linea.maru.serviceAccountName" . }}
+      {{- with .Values.maru.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: {{ .Values.maru.name }}
+          {{- with .Values.maru.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          image: "{{ .Values.maru.image.repository }}:{{ .Values.maru.image.tag }}"
+          imagePullPolicy: {{ .Values.maru.image.pullPolicy }}
+          command: [ "java" ]
+          args:
+            - "-Dlog4j2.configurationFile=configs/maru/log4j.xml"
+            - "-jar"
+            - "maru.jar"
+            - "--maru-genesis-file"
+            - "configs/genesis.json"
+            - "--config"
+            - "configs/config.toml"
+          ports:
+            - name: http-api
+              containerPort: {{ .Values.maru.containerPorts.api }}
+              protocol: TCP
+            {{- if .Values.maru.metrics.enabled }}
+            - name: metrics
+              containerPort: {{ .Values.maru.containerPorts.metrics }}
+              protocol: TCP
+            {{- end }}
+          {{- with .Values.maru.livenessProbe }}
+          livenessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.maru.readinessProbe }}
+          readinessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.maru.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - name: config
+              mountPath: /opt/consensys/maru/configs/config.toml
+              subPath: config.toml
+            - name: config
+              mountPath: /opt/consensys/maru/configs/log4j.xml
+              subPath: log4j.xml
+            - name: genesis
+              mountPath: /opt/consensys/maru/configs/genesis.json
+              subPath: genesis.json
+            - name: key
+              mountPath: /opt/consensys/maru/key
+              subPath: key
+            - name: {{ include "linea.maru.fullname" . }}
+              mountPath: /opt/consensys/maru/data
+          {{- with .Values.maru.volumeMounts }}
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      volumes:
+        - name: config
+          configMap:
+            name: {{ include "linea.maru.fullname" . }}-config
+        - name: genesis
+          configMap:
+            name: {{ include "linea.maru.fullname" . }}-genesis
+        - name: key
+          secret:
+            secretName: {{ include "linea.maru.fullname" . }}
+      {{- with .Values.maru.volumes }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.maru.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.maru.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.maru.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+  volumeClaimTemplates:
+    - metadata:
+        name: {{ include "linea.maru.fullname" . }}
+      spec:
+          {{-  with .Values.maru.volumeClaimTemplates.accessModes }}
+        accessModes:
+            {{- toYaml . | nindent 10 }}
+          {{- end }}
+        storageClassName: "{{ .Values.maru.volumeClaimTemplates.storageClass }}"
+        resources:
+          requests:
+            storage: "{{ .Values.maru.volumeClaimTemplates.size }}"

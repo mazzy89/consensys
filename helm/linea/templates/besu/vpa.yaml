@@ -1,0 +1,21 @@
+{{- if .Values.besu.vpa.enabled }}
+apiVersion: autoscaling.k8s.io/v1
+kind: VerticalPodAutoscaler
+metadata:
+  name: {{ include "linea.besu.fullname" . }}
+  labels:
+    {{- include "linea.labels" (dict "context" . "component" .Values.besu.name "name" .Values.besu.name) | nindent 4 }}
+spec:
+  targetRef:
+    apiVersion: "apps/v1"
+    kind: StatefulSet
+    name: {{ include "linea.besu.fullname" . }}
+  updatePolicy:
+    updateMode: {{ .Values.besu.vpa.updateMode }}
+  resourcePolicy:
+    containerPolicies:
+      - containerName: {{ .Values.besu.name }}
+        {{- with .Values.besu.vpa.resourcePolicy.containerPolicies }}
+          {{- toYaml . | nindent 8 }}
+        {{- end }}
+{{- end }}

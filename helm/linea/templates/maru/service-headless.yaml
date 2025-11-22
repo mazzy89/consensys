@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "linea.maru.fullname" . }}-headless
+  labels:
+    {{- include "linea.labels" (dict "context" . "component" .Values.maru.name "name" .Values.maru.name) | nindent 4 }}
+spec:
+  type: ClusterIP
+  clusterIP: None
+  ports:
+    - port: {{ .Values.maru.service.servicePortApi }}
+      targetPort: {{ .Values.maru.containerPorts.api }}
+      protocol: TCP
+      name: http-api
+  selector:
+    {{- include "linea.selectorLabels" (dict "context" . "name" .Values.maru.name) | nindent 4 }}

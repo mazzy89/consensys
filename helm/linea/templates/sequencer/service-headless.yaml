@@ -1,0 +1,24 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "linea.sequencer.fullname" . }}-headless
+  labels:
+    {{- include "linea.labels" (dict "context" . "component" .Values.sequencer.name "name" .Values.sequencer.name) | nindent 4 }}
+spec:
+  type: ClusterIP
+  clusterIP: None
+  ports:
+    - port: {{ .Values.sequencer.service.servicePortP2p }}
+      targetPort: {{ .Values.sequencer.containerPorts.p2p }}
+      protocol: TCP
+      name: p2p
+    - port: {{ .Values.sequencer.service.serviceEngineApi }}
+      targetPort: {{ .Values.sequencer.containerPorts.engine }}
+      protocol: TCP
+      name: engine
+    - port: {{ .Values.sequencer.service.serviceEthApi }}
+      targetPort: {{ .Values.sequencer.containerPorts.eth }}
+      protocol: TCP
+      name: eth
+  selector:
+    {{- include "linea.selectorLabels" (dict "context" . "name" .Values.sequencer.name) | nindent 4 }}
