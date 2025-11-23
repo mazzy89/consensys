@@ -41,7 +41,17 @@ The `terraform` directory contains Infrastructure as Code (IaC) configurations:
 ### Go Application
 
 The Consensys Sender app is a Go application built with minimal dependencies.
-The Docker image can be built and pushed to a public ECR repository using the provided [Makefile](./Makefile).
+The Docker image can be built locally and pushed to the public ECR repository using the provided [Makefile](./Makefile).
+
+#### Send Tx
+
+The application uses Legacy transaction type following the upstream [example](https://github.com/ethereum/go-ethereum/blob/master/ethclient/ethclient_test.go) for sending transactions instead of EIP-1559 (Type 2) transactions. This
+decision was made because:
+
+- No explicit requirements were specified for the transaction type
+- Legacy transactions provide better compatibility across different Ethereum networks
+- They are simpler to implement and test
+- The gas pricing mechanism is more predictable
 
 ## Build and Deployment
 
@@ -86,6 +96,7 @@ To deploy infrastructure using Terraform:
 
 Note: Make sure you have:
 
+- An active AWS account
 - Valid AWS credentials configured (For this experiment the `AWS_PROFILE` is set into `.envrc` so it is automatically set)
 - Appropriate permissions to create/update/delete resources
 
@@ -108,5 +119,21 @@ Then
 
 #### Secrets
 
-Applications secrets are stored encrypted using [Sops](https://github.com/getsops/sops) and AWS KMS.
+Applications secrets in Helm are stored encrypted using [Sops](https://github.com/getsops/sops) and pre-generated AWS KMS.
 They are decrypted at release time and stored in Kubernetes secrets within the cluster.
+
+## Further improvements
+
+### TLS Certificates
+
+The current implementation does not include TLS certificate management as there were no explicit requirements for it.
+However, for production-ready applications, Besu node endpoints must have TLS certificates configured.
+
+The recommended solution would be to:
+
+- Deploy `cert-manager` in the cluster for automated certificate management
+- Use DNS validation for certificate issuance
+- Configure TLS certificates through annotations at the Gateway API Gateway level
+
+This would ensure secure HTTPS communication for all Besu node endpoints while maintaining automated certificate
+lifecycle management.
