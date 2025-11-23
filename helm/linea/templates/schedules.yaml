@@ -1,0 +1,28 @@
+{{- if .Values.schedules.enabled }}
+apiVersion: velero.io/v1
+kind: Schedule
+metadata:
+  name: {{ include "linea.name" . }}
+  namespace: velero
+spec:
+  schedule: {{ .Values.schedules.expression | quote }}
+  template:
+    includedNamespaces:
+      - {{ .Release.Namespace }}
+    includedResources:
+      - persistentvolumeclaims
+      - persistentvolumes
+    labelSelector:
+      matchExpressions:
+        - key: app.kubernetes.io/name
+          operator: In
+          values:
+            - {{ include "linea.name" . }}-{{ .Values.besu.name }}
+            - {{ include "linea.name" . }}-{{ .Values.sequencer.name }}
+            - {{ include "linea.name" . }}-{{ .Values.maru.name }}
+    snapshotVolumes: true
+    storageLocation: default
+    volumeSnapshotLocations:
+      - default
+    ttl: {{ .Values.schedules.ttl }}
+{{- end }}

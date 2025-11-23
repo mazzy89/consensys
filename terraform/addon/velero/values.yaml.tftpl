@@ -1,0 +1,34 @@
+configuration:
+  backupStorageLocation:
+    - name: default
+      provider: aws
+      bucket: ${s3_bucket_id}
+      config:
+        region: ${region}
+
+  volumeSnapshotLocation:
+    - name: default
+      provider: aws
+      config:
+        region: ${region}
+
+  features: EnableCSI
+
+credentials:
+  useSecret: false   # Using IRSA, so no secret
+
+initContainers:
+  - name: velero-plugin-for-aws
+    image: velero/velero-plugin-for-aws:v1.13.1
+    volumeMounts:
+      - mountPath: /target
+        name: plugins
+
+snapshotsEnabled: true
+
+deployNodeAgent: true
+
+kubectl:
+  image:
+    repository: public.ecr.aws/bitnami/kubectl
+    tag: latest

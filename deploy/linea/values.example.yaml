@@ -1,7 +1,12 @@
 linea:
+  schedules:
+    enabled: true
+    # run backup every 5m
+    expression: "*/5 * * * *"
+    ttl: 30m
+
   besu:
     image:
-      repository: consensys/linea-besu-package
       tag: "beta-v4.0-rc20-20251104100707-3294a02"
     httpRoute:
       enabled: true
@@ -29,7 +34,7 @@ linea:
         cpu: "500m"
         memory: "512Mi"
     volumeClaimTemplates:
-      storageClass: "gp2"
+      storageClass: "ebs-sc"
     vpa:
       enabled: true
       updateMode: Auto
@@ -46,7 +51,6 @@ linea:
 
   ethstats:
     image:
-      repository: consensys/linea-ethstats-server
       tag: "7422b2a-1730387766"
     httpRoute:
       enabled: true
@@ -86,14 +90,13 @@ linea:
       successThreshold: 1
       failureThreshold: 3
     volumeClaimTemplates:
-      storageClass: "gp2"
+      storageClass: "ebs-sc"
 
   sequencer:
     image:
-      repository: consensys/linea-besu-package
       tag: "beta-v4.0-rc20-20251104100707-3294a02"
     volumeClaimTemplates:
-      storageClass: "gp2"
+      storageClass: "ebs-sc"
 
   sender:
     enabled: true

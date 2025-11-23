@@ -16,10 +16,9 @@ releases:
   - name: linea
     namespace: linea
     chart: ./deploy/linea/kustomize
-    installed: false
     dependencies:
       - chart: oci://public.ecr.aws/j0t0w2r4/linea
-        version: 1.0.0
+        version: 1.1.0
         alias: linea
     values:
       - ./deploy/{{ `{{ .Release.Name }}` }}/values.example.yaml

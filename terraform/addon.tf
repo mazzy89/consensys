@@ -19,3 +19,25 @@ resource "helm_release" "envoy_gateway" {
   cleanup_on_fail  = true
   timeout          = 300
 }
+
+resource "helm_release" "velero" {
+  name             = "velero"
+  repository       = "https://vmware-tanzu.github.io/helm-charts"
+  namespace        = "velero"
+  chart            = "velero"
+  version          = "11.2.0"
+  create_namespace = true
+  atomic           = true
+  cleanup_on_fail  = true
+  timeout          = 300
+
+  values = [
+    templatefile(
+      "${path.module}/addon/velero/values.yaml.tftpl",
+      {
+        region       = var.region
+        s3_bucket_id = module.backup_bucket.s3_bucket_id
+      }
+    )
+  ]
+}

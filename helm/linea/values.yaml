@@ -9,6 +9,14 @@ secret:
   # -- Secret key for Ethstats WebSocket connections
   ws_secret: ""
 
+schedules:
+  enabled: false
+  # -- Schedule is a Cron expression defining when to run the Backup
+  expression: ""
+  # -- The amount of time before backups created on this schedule are eligible for garbage collection.
+  ttl: ""
+
+
 # ===================================================================================
 # --- Besu Configuration ---
 # ===================================================================================

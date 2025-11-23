@@ -19,6 +19,25 @@ resource "kubernetes_storage_class" "ebs_sc" {
   depends_on = [module.aws_ebs_csi_pod_identity]
 }
 
+module "velero_pod_identity" {
+  source  = "terraform-aws-modules/eks-pod-identity/aws"
+  version = "~> 2.4"
+
+  name = "velero"
+
+  attach_velero_policy       = true
+  velero_s3_bucket_arns      = ["arn:aws:s3:::${module.backup_bucket.s3_bucket_id}"]
+  velero_s3_bucket_path_arns = ["arn:aws:s3:::${module.backup_bucket.s3_bucket_id}/*"]
+
+  associations = {
+    this = {
+      cluster_name    = module.eks.cluster_name
+      namespace       = "velero"
+      service_account = "velero-server"
+    }
+  }
+}
+
 module "eks" {
   source  = "terraform-aws-modules/eks/aws"
   version = "~> 21.0"
@@ -38,8 +57,8 @@ module "eks" {
       }]
     }
     snapshot-controller = {}
-    kube-proxy     = {}
-    metrics-server = {}
+    kube-proxy          = {}
+    metrics-server      = {}
     vpc-cni = {
       before_compute = true
     }

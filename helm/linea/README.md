@@ -1,6 +1,6 @@
 # Linea Helm Chart
 
-![Version: 1.0.0](https://img.shields.io/badge/Version-1.0.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 1.1.0](https://img.shields.io/badge/Version-1.1.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 This Helm chart deploys the full **Linea stack**, including:
 
@@ -28,8 +28,11 @@ Vault, External-Secrets Operator and other similar solutions can be added afterw
 
 ### Persistent Storage
 
-Linea components are designing using `Statefulset` set. `Statefulset` creates `PersistantVolumeClaim` which use the AWS EBS CSI
-`StorageClass` to provision in AWS a disk on-demand.
+Linea components are designing using `Statefulset` set. `Statefulset` creates `PersistantVolumeClaim` which define the
+`StorageClass` `ebs-sc` which use the AWS EBS CSI to provision in AWS a disk on-demand.
+
+The chart contains a CR `Schedules` from [Velero](https://github.com/vmware-tanzu/velero/tree/main) to run logical backups and
+physical backups of disk volumes for Besu, Sequencer and Maru.
 
 ---
 
@@ -223,6 +226,9 @@ helm install my-linea linea/linea-stack -f values.example.yaml
 | maru.vpa.resourcePolicy.containerPolicies.minAllowed | object | `{"cpu":"100m","memory":"512Mi"}` | Minimum allowed resources |
 | maru.vpa.updateMode | string | `"Auto"` | Update mode for VPA (Off, Initial, Recreate, Auto) |
 | nameOverride | string | `""` | Used to override the deployment name. Overrides the chart name. |
+| schedules.enabled | bool | `false` |  |
+| schedules.expression | string | `""` | Schedule is a Cron expression defining when to run the Backup |
+| schedules.ttl | string | `""` | The amount of time before backups created on this schedule are eligible for garbage collection. |
 | secret.ws_secret | string | `""` | Secret key for Ethstats WebSocket connections |
 | sender.affinity | object | `{}` | Pod affinity settings. |
 | sender.enabled | bool | `false` | If true, enable the Consensys Sender |

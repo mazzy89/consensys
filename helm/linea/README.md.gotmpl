@@ -28,8 +28,11 @@ Vault, External-Secrets Operator and other similar solutions can be added afterw
 
 ### Persistent Storage
 
-Linea components are designing using `Statefulset` set. `Statefulset` creates `PersistantVolumeClaim` which use the AWS EBS CSI
-`StorageClass` to provision in AWS a disk on-demand.
+Linea components are designing using `Statefulset` set. `Statefulset` creates `PersistantVolumeClaim` which define the
+`StorageClass` `ebs-sc` which use the AWS EBS CSI to provision in AWS a disk on-demand.
+
+The chart contains a CR `Schedules` from [Velero](https://github.com/vmware-tanzu/velero/tree/main) to run logical backups and
+physical backups of disk volumes for Besu, Sequencer and Maru.
 
 ---
 

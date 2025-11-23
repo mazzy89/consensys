@@ -1,5 +1,5 @@
 module "ecr" {
-  source = "terraform-aws-modules/ecr/aws"
+  source  = "terraform-aws-modules/ecr/aws"
   version = "~> 3.1"
 
   providers = {
@@ -19,7 +19,7 @@ module "ecr" {
 }
 
 module "linea" {
-  source = "terraform-aws-modules/ecr/aws"
+  source  = "terraform-aws-modules/ecr/aws"
   version = "~> 3.1"
 
   providers = {
