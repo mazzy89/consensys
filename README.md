@@ -120,7 +120,7 @@ Then
 #### Secrets
 
 Application secrets in Helm are stored encrypted using [Sops](https://github.com/getsops/sops) and pre-generated AWS KMS.
-They are decrypted at release time and stored in Kubernetes secrets within the cluster.
+They are decrypted at release using the `helm-secrets` time and stored in Kubernetes secrets within the cluster.
 
 ## Further improvements
 

@@ -28,7 +28,8 @@ Vault, External-Secrets Operator and other similar solutions can be added afterw
 
 ### Persistent Storage
 
-Linea components are designing using `Statefulset` set.
+Linea components are designing using `Statefulset` set. `Statefulset` creates `PersistantVolumeClaim` which use the AWS EBS CSI
+`StorageClass` to provision in AWS a disk on-demand.
 
 ---
 
