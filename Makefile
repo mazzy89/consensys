@@ -8,10 +8,10 @@ IMAGE_CONSENSYS_SENDER=$(ECR_PUBLIC_REPO)/consensys-sender
 IMAGE_TAG_CONSENSYS_SENDER := $(shell git rev-parse --short HEAD)
 IMAGE_ARCH_CONSENSYS_SENDER=linux/amd64
 
-build:
+docker-build:
 	docker build --platform $(IMAGE_ARCH_CONSENSYS_SENDER) -t $(IMAGE_CONSENSYS_SENDER):$(IMAGE_TAG_CONSENSYS_SENDER) $(CURDIR)
 
-push:
+docker-push:
 	aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws
 	docker push $(IMAGE_CONSENSYS_SENDER):$(IMAGE_TAG_CONSENSYS_SENDER)
 
