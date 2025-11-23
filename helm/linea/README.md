@@ -11,12 +11,31 @@ This Helm chart deploys the full **Linea stack**, including:
 
 It provides a complete configuration surface with persistence, metrics, Gateway API support, autoscaling, and customizable security contexts.
 
+## Design considerations
+
+### Secrets
+ 
+Secrets are stored within Kubernetes `Secrets` to remain agnostic of any particular solution.
+Vault, External-Secrets Operator and other similar solutions can be added afterwards.
+
+### Gateway API
+
+[Gateway API](https://gateway-api.sigs.k8s.io/) was chosen over traditional `Ingress` resources because it provides:
+- Better traffic routing capabilities with more granular control
+- Enhanced security features through route-specific policies
+- Native multi-cluster support for future scalability
+- Standardized way to expose services across different Kubernetes providers
+
+### Persistent Storage
+
+Linea components are designing using `Statefulset` set.
+
 ---
 
 ## 📦 Installation
 
 ```sh
-helm repo add linea https://example.com/helm-charts
+helm repo add linea oci://public.ecr.aws/j0t0w2r4/linea
 helm install my-linea linea/linea-stack
 ```
 
