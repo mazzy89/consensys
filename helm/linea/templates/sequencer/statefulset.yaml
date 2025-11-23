@@ -14,8 +14,9 @@ spec:
       {{- include "linea.selectorLabels" (dict "context" . "name" .Values.sequencer.name) | nindent 6 }}
   template:
     metadata:
-      {{- with .Values.sequencer.podAnnotations }}
       annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/sequencer/configmap.yaml") $ | sha256sum }}
+      {{- with .Values.sequencer.podAnnotations }}
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:

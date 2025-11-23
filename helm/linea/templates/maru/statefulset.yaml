@@ -14,8 +14,9 @@ spec:
       {{- include "linea.selectorLabels" (dict "context" . "name" .Values.maru.name) | nindent 6 }}
   template:
     metadata:
-      {{- with .Values.maru.podAnnotations }}
       annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/maru/configmap.yaml") $ | sha256sum }}
+      {{- with .Values.maru.podAnnotations }}
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
