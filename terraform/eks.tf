@@ -19,6 +19,21 @@ resource "kubernetes_storage_class" "ebs_sc" {
   depends_on = [module.aws_ebs_csi_pod_identity]
 }
 
+resource "kubernetes_manifest" "ebs_csi_snapshot_class" {
+  manifest = {
+    apiVersion = "snapshot.storage.k8s.io/v1"
+    kind       = "VolumeSnapshotClass"
+    metadata = {
+      name = "ebs-csi-snapclass"
+      labels = {
+        "velero.io/csi-volumesnapshot-class" = "true"
+      }
+    }
+    driver         = kubernetes_storage_class.ebs_sc.storage_provisioner
+    deletionPolicy = "Delete"
+  }
+}
+
 module "velero_pod_identity" {
   source  = "terraform-aws-modules/eks-pod-identity/aws"
   version = "~> 2.4"
