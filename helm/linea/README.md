@@ -1,6 +1,6 @@
 # Linea Helm Chart
 
-![Version: 1.1.0](https://img.shields.io/badge/Version-1.1.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 1.2.0](https://img.shields.io/badge/Version-1.2.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 This Helm chart deploys the full **Linea stack**, including:
 
@@ -15,7 +15,7 @@ It provides a complete configuration surface with persistence, metrics, Gateway 
 
 ### Secrets
  
-Secrets are stored within Kubernetes `Secrets` to remain agnostic of any particular solution.
+Secrets are stored within Kubernetes `Secrets` objects to remain agnostic of any particular solution.
 Vault, External-Secrets Operator and other similar solutions can be added afterwards.
 
 ### Gateway API
@@ -28,8 +28,7 @@ Vault, External-Secrets Operator and other similar solutions can be added afterw
 
 ### Persistent Storage
 
-Linea components are designing using `Statefulset` set. `Statefulset` creates `PersistantVolumeClaim` which define the
-`StorageClass` `ebs-sc` which use the AWS EBS CSI to provision in AWS a disk on-demand.
+Linea components are designing using `Statefulset` objects.
 
 The chart contains a CR `Schedules` from [Velero](https://github.com/vmware-tanzu/velero/tree/main) to run logical backups and
 physical backups of disk volumes for Besu, Sequencer and Maru.

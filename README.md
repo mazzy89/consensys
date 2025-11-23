@@ -6,10 +6,10 @@ A comprehensive infrastructure and deployment repository for the Consensys Linea
 
 ### Deploy Directory
 
-The `deploy` directory contains manifests used for application deployment.
+The `deploy` directory contains manifests used for Linea Stack deployment.
 This includes:
 
-- Kustomize manifest to define the Gateway API
+- Kustomize manifest to define the Gateway API resources
 - Helm chart values
 - Helm chart encrypted secrets
 
@@ -35,8 +35,9 @@ The `terraform` directory contains Infrastructure as Code (IaC) configurations:
 
 - AWS VPC
 - AWS EKS
-- Kubernetes Addons
+- Kubernetes Addons installed via Helm
 - AWS public ECR
+- AWS S3 bucket
 
 ### Go Application
 
@@ -45,13 +46,23 @@ The Docker image can be built locally and pushed to the public ECR repository us
 
 #### Send Tx
 
-The application uses Legacy transaction type following the upstream [example](https://github.com/ethereum/go-ethereum/blob/master/ethclient/ethclient_test.go) for sending transactions instead of EIP-1559 (Type 2) transactions. This
-decision was made because:
+The application uses Legacy transaction type following the upstream [example](https://github.com/ethereum/go-ethereum/blob/master/ethclient/ethclient_test.go)
+for sending transactions instead of EIP-1559 (Type 2) transactions. This  decision was made because:
 
 - No explicit requirements were specified for the transaction type
 - Legacy transactions provide better compatibility across different Ethereum networks
 - They are simpler to implement and test
 - The gas pricing mechanism is more predictable
+
+## Architecture
+
+## Architecture
+
+The application uses [Envoy Gateway](https://gateway.envoyproxy.io/), which is built on top of Envoy Proxy to provide API gateway functionality.
+It automatically provisions an AWS Application Load Balancer (ALB) and configures it through the Kubernetes Gateway API.
+
+A StatefulSet is used to create PersistentVolumeClaims (PVCs), which reference the `ebs-sc` StorageClass (created within Terraform)
+This StorageClass relies on the AWS EBS CSI driver to dynamically provision EBS volumes on demand.
 
 ## Build and Deployment
 
@@ -68,7 +79,7 @@ All the required tools and dependencies can be installed automatically using Nix
    - `direnv`
    - [`nix-direnv`](https://github.com/nix-community/nix-direnv)
    
-This will ensure that once you get access to the repository Nix environment is automatically enabled.
+This will ensure that once you cd into the `consensys` directory, the Nix environment is automatically enabled.
 
 ### Terraform
 
@@ -97,7 +108,7 @@ To deploy infrastructure using Terraform:
 Note: Make sure you have:
 
 - An active AWS account
-- Valid AWS credentials configured (For this experiment the `AWS_PROFILE` is set into `.envrc` so it is automatically set)
+- Valid AWS credentials configured (For this experiment the `AWS_PROFILE` is defined into `.envrc` so it is automatically set once cd into the dir)
 - Appropriate permissions to create/update/delete resources
 
 The Terraform workspace will create the EKS cluster named `consensys` with the required addons installed.
@@ -127,7 +138,7 @@ They are decrypted at release using the `helm-secrets` time and stored in Kubern
 ### TLS Certificates
 
 The current implementation does not include TLS certificate management as there were no explicit requirements for it.
-However, for production-ready applications, Besu node endpoints must have TLS certificates configured.
+However, for production-ready applications, any public endpoints must have TLS certificates configured.
 
 The recommended solution would be to:
 
@@ -135,5 +146,5 @@ The recommended solution would be to:
 - Use DNS validation for certificate issuance
 - Configure TLS certificates through annotations at the Gateway API Gateway level
 
-This would ensure secure HTTPS communication for all Besu node endpoints while maintaining automated certificate
+This would ensure secure HTTPS communication for all the endpoints while maintaining automated certificate
 lifecycle management.
