@@ -90,3 +90,23 @@ Note: Make sure you have:
 - Appropriate permissions to create/update/delete resources
 
 The Terraform workspace will create the EKS cluster named `consensys` with the required addons installed.
+
+### Helmfile
+
+The Helm chart lifecycle is managed using [Helmfile](https://github.com/helmfile/helmfile)
+It allows you to declaratively define the specifications of all the charts intended to be released.
+
+To run successfully, Helmfile, run first:
+
+- `make docker-build`
+- `make docker-push`
+- `make helm-push`
+
+Then
+
+`make helmfile-apply`
+
+#### Secrets
+
+Applications secrets are stored encrypted using [Sops](https://github.com/getsops/sops) and AWS KMS.
+They are decrypted at release time and stored in Kubernetes secrets within the cluster.
