@@ -87,7 +87,7 @@ module "eks" {
       ami_type       = "BOTTLEROCKET_x86_64"
       instance_types = ["t3.medium"]
 
-      min_size = 2
+      min_size = 0
       max_size = 3
       # This value is ignored after the initial creation
       # https://github.com/bryantbiggs/eks-desired-size-hack
