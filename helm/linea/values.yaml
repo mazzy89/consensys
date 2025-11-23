@@ -283,17 +283,6 @@ ethstats:
   # -- Resource limits and requests (CPU/Memory).
   resources: {}
 
-  # -- Vertical Pod Autoscaler configuration
-  vpa:
-    # -- Enable or disable VPA
-    enabled: false
-    # -- Update mode for VPA (Off, Initial, Recreate, Auto)
-    updateMode: Auto
-    # -- Resource policy configuration
-    resourcePolicy:
-      # -- Container policies
-      containerPolicies: {}
-
   # -- Security context applied to the container.
   securityContext: {}
 
@@ -585,3 +574,74 @@ sequencer:
 
   # -- Pod affinity settings.
   affinity: { }
+
+# ===================================================================================
+# --- Sender Configuration ---
+# ===================================================================================
+sender:
+  # -- If true, enable the Consensys Sender
+  enabled: false
+  # -- The component name
+  name: sender
+  # -- Number of desired replicas for the deployment.
+  replicaCount: 1
+
+  # -- Docker image settings for Sender.
+  image:
+    # -- Image pull policy. 'IfNotPresent' is typical for production.
+    pullPolicy: IfNotPresent
+    # -- Docker repository path for the Consensys Sender image.
+    repository: public.ecr.aws/j0t0w2r4/consensys-sender
+    # -- Specific Docker image tag (version) to use.
+    tag: ""
+
+  # -- List of secrets used for pulling images from private registries.
+  imagePullSecrets: []
+
+  # -- Service Account configuration.
+  serviceAccount:
+    # -- Annotations for the created ServiceAccount.
+    annotations: { }
+    # -- Controls if the ServiceAccount token should be automatically mounted.
+    automount: true
+    # -- If true, a ServiceAccount resource will be created.
+    create: true
+    # -- The name of the ServiceAccount to use or create.
+    name: ""
+
+
+  # -- Annotations to add to the Pod metadata.
+  podAnnotations: {}
+  # -- Labels to add to the Pod metadata.
+  podLabels: {}
+  # -- Security context applied to the Pod.
+  podSecurityContext: {}
+
+  # -- Liveness probe configuration.
+  livenessProbe: {}
+
+  # -- Readiness probe configuration.
+  readinessProbe: {}
+
+  # -- Resource limits and requests (CPU/Memory).
+  resources: {}
+
+  # -- Security context applied to the container.
+  securityContext: {}
+
+  # -- List of volume mounts for the container.
+  volumeMounts: []
+  # -- List of additional volumes defined at the Pod level.
+  volumes: []
+
+  # -- Node selection constraints.
+  nodeSelector: {}
+  # -- Tolerations for taints.
+  tolerations: [ ]
+  # -- Pod affinity settings.
+  affinity: { }
+
+  # -- Internal secret configuration for Sender.
+  secret:
+    # -- Private Key for the Sender account
+    private_key: ""

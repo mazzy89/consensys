@@ -94,3 +94,8 @@ linea:
       tag: "beta-v4.0-rc20-20251104100707-3294a02"
     volumeClaimTemplates:
       storageClass: "gp2"
+
+  sender:
+    enabled: true
+    image:
+      tag: 84b5e21

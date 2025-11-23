@@ -1,0 +1,84 @@
+{{- if .Values.sender.enabled -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "linea.sender.fullname" . }}
+  labels:
+    {{- include "linea.labels" (dict "context" . "component" .Values.sender.name "name" .Values.sender.name) | nindent 4 }}
+spec:
+  replicas: {{ .Values.sender.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "linea.selectorLabels" (dict "context" . "name" .Values.sender.name) | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.sender.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "linea.selectorLabels" (dict "context" . "name" .Values.sender.name) | nindent 8 }}
+        {{- with .Values.sender.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.sender.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "linea.sender.fullname" . }}
+      {{- with .Values.sender.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: {{ .Values.sender.name }}
+          {{- with .Values.sender.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          image: "{{ .Values.sender.image.repository }}:{{ .Values.sender.image.tag }}"
+          args:
+            - --rpc-api=http://besu-node.mazzarino.cz
+            - --to-address=71562b71999873DB5b286dF957af199Ec94617F7
+            - --interval=5s
+          imagePullPolicy: {{ .Values.sender.image.pullPolicy }}
+          env:
+            - name: PRIVATE_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "linea.sender.fullname" . }}
+                  key: private_key
+          {{- with .Values.sender.livenessProbe }}
+          livenessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.sender.readinessProbe }}
+          readinessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.sender.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.sender.volumeMounts }}
+          volumeMounts:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      {{- with .Values.sender.volumes }}
+      volumes:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.sender.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.sender.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.sender.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{- end }}

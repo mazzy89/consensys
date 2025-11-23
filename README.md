@@ -24,6 +24,9 @@ The `helm` directory contains the Kubernetes `Linea` Helm chart for deploying th
 - `ethstats`
 - `sender` (optional)
 
+For detailed information about the Helm chart configuration and values, please refer to
+the [Linea Helm Chart README](./helm/linea/README.md).
+
 ### Terraform Directory
 
 The `terraform` directory contains Infrastructure as Code (IaC) configurations:
@@ -31,6 +34,12 @@ The `terraform` directory contains Infrastructure as Code (IaC) configurations:
 - AWS VPC
 - AWS EKS
 - Kubernetes Addons
+- AWS public ECR
+
+### Go Application
+
+The Consensys Sender app is a Go application built with minimal dependencies.
+The Docker image can be built and pushed to a public ECR repository using the provided [Makefile](./Makefile).
 
 ## Build and Deployment
 
@@ -43,12 +52,11 @@ All the required tools and dependencies can be installed automatically using Nix
    ```
    experimental-features = nix-command flakes
    ```
-3. Run `nix develop` in the project root directory to enter a shell with all required tools installed:
-    - Docker
-    - Helm
-    - Terraform
-    - kubectl
-    - Other development dependencies
+3. Install
+   - `direnv`
+   - [`nix-direnv`](https://github.com/nix-community/nix-direnv)
+   
+This will ensure that once you get access to the repository Nix environment is automatically enabled.
 
 ### Terraform
 
@@ -76,7 +84,7 @@ To deploy infrastructure using Terraform:
 
 Note: Make sure you have:
 
-- Valid AWS credentials configured
-- Appropriate permissions to create resources
+- Valid AWS credentials configured (For this experiment the `AWS_PROFILE` is set into `.envrc` so it is automatically set)
+- Appropriate permissions to create/update/delete resources
 
-The Terraform workspace will run an EKS cluster named `consensys` with the required addons installed
+The Terraform workspace will create the EKS cluster named `consensys` with the required addons installed.

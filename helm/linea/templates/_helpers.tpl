@@ -92,3 +92,21 @@ Create the address of the sequencer to use
 {{- define "linea.sequencer.addr" -}}
 {{- printf "%s-0.%s-headless.%s.svc.cluster.local" (include "linea.sequencer.fullname" .) (include "linea.sequencer.fullname" .) (.Release.Namespace ) -}}
 {{- end -}}
+
+{{/*
+Create linea sequencer name and version as used by the chart label.
+*/}}
+{{- define "linea.sender.fullname" -}}
+{{- printf "%s-%s" (include "linea.fullname" .) .Values.sender.name | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+
+{{/*
+Create the name of the sender service account to use
+*/}}
+{{- define "linea.sender.serviceAccountName" -}}
+{{- if .Values.sequencer.serviceAccount.create -}}
+    {{ default (include "linea.sender.fullname" .) .Values.sequencer.serviceAccount.name }}
+{{- else -}}
+    {{ default "default" .Values.sender.serviceAccount.name }}
+{{- end -}}
+{{- end -}}

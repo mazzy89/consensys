@@ -9,6 +9,8 @@ module "ecr" {
   repository_name = "${var.namespace}-sender"
   repository_type = "public"
 
+  repository_read_write_access_arns = ["arn:aws:iam::025857592400:user/Me"]
+
   public_repository_catalog_data = {
     description       = "Docker container for running Consensys Sender"
     operating_systems = ["Linux"]

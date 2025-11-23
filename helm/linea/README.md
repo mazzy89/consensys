@@ -1,6 +1,6 @@
 # Linea Helm Chart
 
-![Version: 1.0.0](https://img.shields.io/badge/Version-1.0.0-informational?style=flat-square)
+![Version: 1.0.0](https://img.shields.io/badge/Version-1.0.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 This Helm chart deploys the full **Linea stack**, including:
 
@@ -40,10 +40,10 @@ helm install my-linea linea/linea-stack -f values.example.yaml
 | besu.containerPorts.metrics | int | `9547` | Internal container port for metrics (Prometheus). |
 | besu.containerPorts.rpc | int | `8545` | Internal container port for JSON-RPC. |
 | besu.containerPorts.ws | int | `8546` | Internal container port for WebSocket. |
-| besu.httpRoute | object | `{"annotations":{},"enabled":false,"hostnames":["chart-example.local"],"parentRefs":[{"name":"gateway","sectionName":"http"}],"rules":[{"matches":[{"path":{"type":"PathPrefix","value":"/headers"}}]}]}` | Kubernetes Gateway API HttpRoute configuration (if using the Gateway API). |
+| besu.httpRoute | object | `{"annotations":{},"enabled":false,"hostnames":[],"parentRefs":[{"name":"gateway","sectionName":"http"}],"rules":[{"matches":[{"path":{"type":"PathPrefix","value":"/headers"}}]}]}` | Kubernetes Gateway API HttpRoute configuration (if using the Gateway API). |
 | besu.httpRoute.annotations | object | `{}` | Annotations for the HttpRoute resource. |
 | besu.httpRoute.enabled | bool | `false` | Enable or disable HttpRoute creation. |
-| besu.httpRoute.hostnames | list | `["chart-example.local"]` | List of hostnames the route should match. |
+| besu.httpRoute.hostnames | list | `[]` | List of hostnames the route should match. |
 | besu.httpRoute.parentRefs | list | `[{"name":"gateway","sectionName":"http"}]` | List of parent Gateways this route is attached to. |
 | besu.httpRoute.rules | list | `[{"matches":[{"path":{"type":"PathPrefix","value":"/headers"}}]}]` | Routing rules. |
 | besu.httpRoute.rules[0].matches[0].path.type | string | `"PathPrefix"` | Type of path matching (e.g., PathPrefix). |
@@ -93,11 +93,19 @@ helm install my-linea linea/linea-stack -f values.example.yaml
 | besu.volumeClaimTemplates.storageClass | string | `""` | Storage class to use for the volume. |
 | besu.volumeMounts | list | `[]` | List of volume mounts for the container. |
 | besu.volumes | list | `[]` | List of additional volumes defined at the Pod level. |
+| besu.vpa | object | `{"enabled":false,"resourcePolicy":{"containerPolicies":{"controlledResources":["cpu","memory"],"maxAllowed":{"cpu":"4","memory":"8Gi"},"minAllowed":{"cpu":"100m","memory":"512Mi"}}},"updateMode":"Auto"}` | Vertical Pod Autoscaler configuration |
+| besu.vpa.enabled | bool | `false` | Enable or disable VPA |
+| besu.vpa.resourcePolicy | object | `{"containerPolicies":{"controlledResources":["cpu","memory"],"maxAllowed":{"cpu":"4","memory":"8Gi"},"minAllowed":{"cpu":"100m","memory":"512Mi"}}}` | Resource policy configuration |
+| besu.vpa.resourcePolicy.containerPolicies | object | `{"controlledResources":["cpu","memory"],"maxAllowed":{"cpu":"4","memory":"8Gi"},"minAllowed":{"cpu":"100m","memory":"512Mi"}}` | Container policies |
+| besu.vpa.resourcePolicy.containerPolicies.controlledResources | list | `["cpu","memory"]` | Resources to be controlled by VPA |
+| besu.vpa.resourcePolicy.containerPolicies.maxAllowed | object | `{"cpu":"4","memory":"8Gi"}` | Maximum allowed resources |
+| besu.vpa.resourcePolicy.containerPolicies.minAllowed | object | `{"cpu":"100m","memory":"512Mi"}` | Minimum allowed resources |
+| besu.vpa.updateMode | string | `"Auto"` | Update mode for VPA (Off, Initial, Recreate, Auto) |
 | ethstats.affinity | object | `{}` | Pod affinity settings. |
-| ethstats.httpRoute | object | `{"annotations":{},"enabled":false,"hostnames":["chart-example.local"],"parentRefs":[{"name":"gateway","sectionName":"http"}],"rules":[{"matches":[{"path":{"type":"PathPrefix","value":"/headers"}}]}]}` | Kubernetes Gateway API HttpRoute configuration (if using the Gateway API). |
+| ethstats.httpRoute | object | `{"annotations":{},"enabled":false,"hostnames":[],"parentRefs":[{"name":"gateway","sectionName":"http"}],"rules":[{"matches":[{"path":{"type":"PathPrefix","value":"/headers"}}]}]}` | Kubernetes Gateway API HttpRoute configuration (if using the Gateway API). |
 | ethstats.httpRoute.annotations | object | `{}` | Annotations for the HttpRoute resource. |
 | ethstats.httpRoute.enabled | bool | `false` | Enable or disable HttpRoute creation. |
-| ethstats.httpRoute.hostnames | list | `["chart-example.local"]` | List of hostnames the route should match. |
+| ethstats.httpRoute.hostnames | list | `[]` | List of hostnames the route should match. |
 | ethstats.httpRoute.parentRefs | list | `[{"name":"gateway","sectionName":"http"}]` | List of parent Gateways this route is attached to. |
 | ethstats.httpRoute.rules | list | `[{"matches":[{"path":{"type":"PathPrefix","value":"/headers"}}]}]` | Routing rules. |
 | ethstats.httpRoute.rules[0].matches[0].path.type | string | `"PathPrefix"` | Type of path matching (e.g., PathPrefix). |
@@ -186,8 +194,43 @@ helm install my-linea linea/linea-stack -f values.example.yaml
 | maru.volumeClaimTemplates.storageClass | string | `""` | Storage class to use for the volume. |
 | maru.volumeMounts | list | `[]` | List of volume mounts for the container. |
 | maru.volumes | list | `[]` | List of additional volumes defined at the Pod level. |
+| maru.vpa | object | `{"enabled":false,"resourcePolicy":{"containerPolicies":{"controlledResources":["cpu","memory"],"maxAllowed":{"cpu":"4","memory":"8Gi"},"minAllowed":{"cpu":"100m","memory":"512Mi"}}},"updateMode":"Auto"}` | Vertical Pod Autoscaler configuration |
+| maru.vpa.enabled | bool | `false` | Enable or disable VPA |
+| maru.vpa.resourcePolicy | object | `{"containerPolicies":{"controlledResources":["cpu","memory"],"maxAllowed":{"cpu":"4","memory":"8Gi"},"minAllowed":{"cpu":"100m","memory":"512Mi"}}}` | Resource policy configuration |
+| maru.vpa.resourcePolicy.containerPolicies | object | `{"controlledResources":["cpu","memory"],"maxAllowed":{"cpu":"4","memory":"8Gi"},"minAllowed":{"cpu":"100m","memory":"512Mi"}}` | Container policies |
+| maru.vpa.resourcePolicy.containerPolicies.controlledResources | list | `["cpu","memory"]` | Resources to be controlled by VPA |
+| maru.vpa.resourcePolicy.containerPolicies.maxAllowed | object | `{"cpu":"4","memory":"8Gi"}` | Maximum allowed resources |
+| maru.vpa.resourcePolicy.containerPolicies.minAllowed | object | `{"cpu":"100m","memory":"512Mi"}` | Minimum allowed resources |
+| maru.vpa.updateMode | string | `"Auto"` | Update mode for VPA (Off, Initial, Recreate, Auto) |
 | nameOverride | string | `""` | Used to override the deployment name. Overrides the chart name. |
 | secret.ws_secret | string | `""` | Secret key for Ethstats WebSocket connections |
+| sender.affinity | object | `{}` | Pod affinity settings. |
+| sender.enabled | bool | `false` | If true, enable the Consensys Sender |
+| sender.image | object | `{"pullPolicy":"IfNotPresent","repository":"public.ecr.aws/j0t0w2r4/consensys-sender","tag":""}` | Docker image settings for Sender. |
+| sender.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy. 'IfNotPresent' is typical for production. |
+| sender.image.repository | string | `"public.ecr.aws/j0t0w2r4/consensys-sender"` | Docker repository path for the Consensys Sender image. |
+| sender.image.tag | string | `""` | Specific Docker image tag (version) to use. |
+| sender.imagePullSecrets | list | `[]` | List of secrets used for pulling images from private registries. |
+| sender.livenessProbe | object | `{}` | Liveness probe configuration. |
+| sender.name | string | `"sender"` | The component name |
+| sender.nodeSelector | object | `{}` | Node selection constraints. |
+| sender.podAnnotations | object | `{}` | Annotations to add to the Pod metadata. |
+| sender.podLabels | object | `{}` | Labels to add to the Pod metadata. |
+| sender.podSecurityContext | object | `{}` | Security context applied to the Pod. |
+| sender.readinessProbe | object | `{}` | Readiness probe configuration. |
+| sender.replicaCount | int | `1` | Number of desired replicas for the deployment. |
+| sender.resources | object | `{}` | Resource limits and requests (CPU/Memory). |
+| sender.secret | object | `{"private_key":""}` | Internal secret configuration for Sender. |
+| sender.secret.private_key | string | `""` | Private Key for the Sender account |
+| sender.securityContext | object | `{}` | Security context applied to the container. |
+| sender.serviceAccount | object | `{"annotations":{},"automount":true,"create":true,"name":""}` | Service Account configuration. |
+| sender.serviceAccount.annotations | object | `{}` | Annotations for the created ServiceAccount. |
+| sender.serviceAccount.automount | bool | `true` | Controls if the ServiceAccount token should be automatically mounted. |
+| sender.serviceAccount.create | bool | `true` | If true, a ServiceAccount resource will be created. |
+| sender.serviceAccount.name | string | `""` | The name of the ServiceAccount to use or create. |
+| sender.tolerations | list | `[]` | Tolerations for taints. |
+| sender.volumeMounts | list | `[]` | List of volume mounts for the container. |
+| sender.volumes | list | `[]` | List of additional volumes defined at the Pod level. |
 | sequencer.affinity | object | `{}` | Pod affinity settings. |
 | sequencer.containerPorts | object | `{"engine":8550,"eth":8545,"metrics":9547,"p2p":30303}` | Container port mappings. |
 | sequencer.containerPorts.engine | int | `8550` | Internal container port for the Engine API. |
@@ -241,6 +284,14 @@ helm install my-linea linea/linea-stack -f values.example.yaml
 | sequencer.volumeClaimTemplates.storageClass | string | `""` | Storage class to use for the volume. |
 | sequencer.volumeMounts | list | `[]` | List of volume mounts for the container. |
 | sequencer.volumes | list | `[]` | List of additional volumes defined at the Pod level. |
+| sequencer.vpa | object | `{"enabled":false,"resourcePolicy":{"containerPolicies":{"controlledResources":["cpu","memory"],"maxAllowed":{"cpu":"4","memory":"8Gi"},"minAllowed":{"cpu":"100m","memory":"512Mi"}}},"updateMode":"Auto"}` | Vertical Pod Autoscaler configuration |
+| sequencer.vpa.enabled | bool | `false` | Enable or disable VPA |
+| sequencer.vpa.resourcePolicy | object | `{"containerPolicies":{"controlledResources":["cpu","memory"],"maxAllowed":{"cpu":"4","memory":"8Gi"},"minAllowed":{"cpu":"100m","memory":"512Mi"}}}` | Resource policy configuration |
+| sequencer.vpa.resourcePolicy.containerPolicies | object | `{"controlledResources":["cpu","memory"],"maxAllowed":{"cpu":"4","memory":"8Gi"},"minAllowed":{"cpu":"100m","memory":"512Mi"}}` | Container policies |
+| sequencer.vpa.resourcePolicy.containerPolicies.controlledResources | list | `["cpu","memory"]` | Resources to be controlled by VPA |
+| sequencer.vpa.resourcePolicy.containerPolicies.maxAllowed | object | `{"cpu":"4","memory":"8Gi"}` | Maximum allowed resources |
+| sequencer.vpa.resourcePolicy.containerPolicies.minAllowed | object | `{"cpu":"100m","memory":"512Mi"}` | Minimum allowed resources |
+| sequencer.vpa.updateMode | string | `"Auto"` | Update mode for VPA (Off, Initial, Recreate, Auto) |
 
 ---
 
