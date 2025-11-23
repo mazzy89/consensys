@@ -1,4 +1,4 @@
-.PHONY: test build push helmfile-diff helmfile-apply helm-docs helm-push
+.PHONY: helm-test docker-build docker-push helmfile-diff helmfile-apply helm-docs helm-push
 
 IMAGE_HELM_UNITTEST=docker.io/helmunittest/helm-unittest:3.17.2-0.8.0
 
@@ -8,17 +8,19 @@ IMAGE_CONSENSYS_SENDER=$(ECR_PUBLIC_REPO)/consensys-sender
 IMAGE_TAG_CONSENSYS_SENDER := $(shell git rev-parse --short HEAD)
 IMAGE_ARCH_CONSENSYS_SENDER=linux/amd64
 
+ecr-login:
+	aws ecr-public get-login-password --region us-east-1 | helm registry login -u AWS --password-stdin public.ecr.aws
+
 docker-build:
 	docker build --platform $(IMAGE_ARCH_CONSENSYS_SENDER) -t $(IMAGE_CONSENSYS_SENDER):$(IMAGE_TAG_CONSENSYS_SENDER) $(CURDIR)
 
-docker-push:
-	aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws
+docker-push: ecr-login
 	docker push $(IMAGE_CONSENSYS_SENDER):$(IMAGE_TAG_CONSENSYS_SENDER)
 
-helmfile-diff:
+helmfile-diff: ecr-login
 	helmfile diff -f helmfile.yaml.gotmpl
 
-helmfile-apply:
+helmfile-apply: ecr-login
 	helmfile apply -f helmfile.yaml.gotmpl
 
 helm-test:
@@ -27,7 +29,7 @@ helm-test:
 helm-docs:
 	helm-docs --chart-search-root $(CURDIR)/helm/linea --skip-version-footer
 
-helm-push:
+helm-push: ecr-login
 	helm package $(CURDIR)/helm/linea
 	helm push linea-$(shell yq '.version' $(CURDIR)/helm/linea/Chart.yaml).tgz oci://$(ECR_PUBLIC_REPO)
 	rm -rf linea-$(shell yq '.version' $(CURDIR)/helm/linea/Chart.yaml).tgz
