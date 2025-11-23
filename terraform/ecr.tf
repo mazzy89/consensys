@@ -17,3 +17,17 @@ module "ecr" {
     architectures     = ["x86"]
   }
 }
+
+module "linea" {
+  source = "terraform-aws-modules/ecr/aws"
+  version = "~> 3.1"
+
+  providers = {
+    aws = aws.us
+  }
+
+  repository_name = "linea"
+  repository_type = "public"
+
+  repository_read_write_access_arns = ["arn:aws:iam::025857592400:user/Me"]
+}

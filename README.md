@@ -24,6 +24,8 @@ The `helm` directory contains the Kubernetes `Linea` Helm chart for deploying th
 - `ethstats`
 - `sender` (optional)
 
+It is released publicly using the Make target `helm-push` and available at `oci://public.ecr.aws/j0t0w2r4/linea`
+
 For detailed information about the Helm chart configuration and values, please refer to
 the [Linea Helm Chart README](./helm/linea/README.md).
 
