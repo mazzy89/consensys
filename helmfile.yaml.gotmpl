@@ -7,12 +7,18 @@ helmDefaults:
   wait: true
   createNamespace: true
 
+repositories:
+  - name: public-ecr
+    url: public.ecr.aws/j0t0w2r4
+    oci: true
+
 releases:
   - name: linea
     namespace: linea
     chart: ./deploy/linea/kustomize
+    installed: false
     dependencies:
-      - chart: ./helm/linea
+      - chart: oci://public.ecr.aws/j0t0w2r4/linea
         version: 1.0.0
         alias: linea
     values:
