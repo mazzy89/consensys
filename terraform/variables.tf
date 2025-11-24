@@ -16,3 +16,7 @@ variable "vpc_cidr" {
   default     = "10.0.0.0/16"
 }
 
+variable "user_arn" {
+  type    = string
+  default = "arn:aws:iam::025857592400:user/Me"
+}
