@@ -118,6 +118,10 @@ module "eks" {
 
   endpoint_public_access = true
 
+  # Disable cloudwatch log group to not incurr in high cost
+  # In Production you want to still enable log group
+  create_cloudwatch_log_group = false
+
   access_entries = {
     admin = {
       principal_arn = var.user_arn
