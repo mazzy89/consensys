@@ -14,7 +14,7 @@ ecr-login:
 docker-build:
 	docker build --platform $(IMAGE_ARCH_CONSENSYS_SENDER) -t $(IMAGE_CONSENSYS_SENDER):$(IMAGE_TAG_CONSENSYS_SENDER) $(CURDIR)
 
-docker-push: ecr-login
+docker-push: ecr-login docker-build
 	docker push $(IMAGE_CONSENSYS_SENDER):$(IMAGE_TAG_CONSENSYS_SENDER)
 
 helmfile-diff: ecr-login

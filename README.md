@@ -42,7 +42,8 @@ The `terraform` directory contains Infrastructure as Code (IaC) configurations:
 ### Go Application
 
 The Consensys Sender app is a Go application built with minimal dependencies.
-The Docker image can be built locally and pushed to the public ECR repository using the provided [Makefile](./Makefile).
+The Docker image, which follows a multi-stage build process, can be built locally and pushed to the public ECR repository
+using the provided [Makefile](./Makefile).
 
 #### Send Tx
 
@@ -53,8 +54,6 @@ for sending transactions instead of EIP-1559 (Type 2) transactions. This  decisi
 - Legacy transactions provide better compatibility across different Ethereum networks
 - They are simpler to implement and test
 - The gas pricing mechanism is more predictable
-
-## Architecture
 
 ## Architecture
 
@@ -113,6 +112,8 @@ Note: Make sure you have:
 
 The Terraform workspace will create the EKS cluster named `consensys` with the required addons installed.
 
+Note that for this experiment it has been opted out to create an AWS S3 bucket to store the Terraform state remotely.
+
 ### Helmfile
 
 The Helm chart lifecycle is managed using [Helmfile](https://github.com/helmfile/helmfile)
@@ -120,11 +121,12 @@ It allows you to declaratively define the specifications of all the charts inten
 
 To run successfully, Helmfile, run first:
 
-- `make docker-build`
 - `make docker-push`
 - `make helm-push`
 
-Then
+It will ensure to build the image of the app and push the Helm Chart to the registry
+
+Then run:
 
 `make helmfile-apply`
 
