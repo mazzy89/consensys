@@ -39,9 +39,9 @@ spec:
           {{- end }}
           image: "{{ .Values.sender.image.repository }}:{{ .Values.sender.image.tag }}"
           args:
-            - --rpc-api=http://besu-node.mazzarino.cz
-            - --to-address=71562b71999873DB5b286dF957af199Ec94617F7
-            - --interval=5s
+            - --rpc-api={{ .Values.sender.config.rpcApi }}
+            - --to-address={{ .Values.sender.config.toAddress }}
+            - --interval={{ .Values.sender.config.interval }}
           imagePullPolicy: {{ .Values.sender.image.pullPolicy }}
           env:
             - name: PRIVATE_KEY

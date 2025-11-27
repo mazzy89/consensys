@@ -102,3 +102,6 @@ linea:
     enabled: true
     image:
       tag: 84b5e21
+    config:
+      rpcApi: "http://besu-node.mazzarino.cz"
+      toAddress: "71562b71999873DB5b286dF957af199Ec94617F7"

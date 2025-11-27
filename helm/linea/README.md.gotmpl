@@ -8,6 +8,7 @@ This Helm chart deploys the full **Linea stack**, including:
 * **EthStats**: a web UI which displays network nodes status like latest block, number of peers, etc.
 * **Maru**: an in-house developed consensus client, similar to Teku and others, which is proposing and signing blocks (since we're running Paris fork)
 * **Sequencer**: an execution layer sequencer which is in charge of sequencing(ordering) transactions in a block
+* **Sender**: (optional) an application to send tokens to a specified address every set interval
 
 It provides a complete configuration surface with persistence, metrics, Gateway API support, autoscaling, and customizable security contexts.
 

@@ -1,6 +1,6 @@
 # Linea Helm Chart
 
-![Version: 1.2.0](https://img.shields.io/badge/Version-1.2.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 1.2.1](https://img.shields.io/badge/Version-1.2.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 This Helm chart deploys the full **Linea stack**, including:
 
@@ -8,6 +8,7 @@ This Helm chart deploys the full **Linea stack**, including:
 * **EthStats**: a web UI which displays network nodes status like latest block, number of peers, etc.
 * **Maru**: an in-house developed consensus client, similar to Teku and others, which is proposing and signing blocks (since we're running Paris fork)
 * **Sequencer**: an execution layer sequencer which is in charge of sequencing(ordering) transactions in a block
+* **Sender**: (optional) an application to send tokens to a specified address every set interval
 
 It provides a complete configuration surface with persistence, metrics, Gateway API support, autoscaling, and customizable security contexts.
 
@@ -230,6 +231,10 @@ helm install my-linea linea/linea-stack -f values.example.yaml
 | schedules.ttl | string | `""` | The amount of time before backups created on this schedule are eligible for garbage collection. |
 | secret.ws_secret | string | `""` | Secret key for Ethstats WebSocket connections |
 | sender.affinity | object | `{}` | Pod affinity settings. |
+| sender.config | object | `{"interval":"5s","rpcApi":"","toAddress":""}` | Configuration for Sender. |
+| sender.config.interval | string | `"5s"` | Interval at which funds are sent |
+| sender.config.rpcApi | string | `""` | RPC API url |
+| sender.config.toAddress | string | `""` | Destination address to send tokens to |
 | sender.enabled | bool | `false` | If true, enable the Consensys Sender |
 | sender.image | object | `{"pullPolicy":"IfNotPresent","repository":"public.ecr.aws/j0t0w2r4/consensys-sender","tag":""}` | Docker image settings for Sender. |
 | sender.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy. 'IfNotPresent' is typical for production. |

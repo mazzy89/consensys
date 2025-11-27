@@ -653,3 +653,12 @@ sender:
   secret:
     # -- Private Key for the Sender account
     private_key: ""
+
+  # -- Configuration for Sender.
+  config:
+    # -- RPC API url
+    rpcApi: ""
+    # -- Destination address to send tokens to
+    toAddress: ""
+    # -- Interval at which funds are sent
+    interval: "5s"
